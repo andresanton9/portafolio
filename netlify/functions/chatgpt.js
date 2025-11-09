@@ -169,9 +169,37 @@ const fetchAssistantReply = async (threadId) => {
   return extractTextFromMessage(lastMessage);
 };
 
+const openaiStreamRun = async (threadId) => {
+  ensureEnv();
+
+  const response = await fetchWithFallback(`${API_BASE}/threads/${threadId}/runs`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+      "OpenAI-Beta": "assistants=v2",
+    },
+    body: JSON.stringify({
+      assistant_id: process.env.OPENAI_ASSISTANT_ID,
+      stream: true,
+    }),
+  });
+
+  if (!response.ok || !response.body) {
+    const errorPayload = await response.text();
+    throw new Error(
+      `OpenAI stream request failed (${response.status}): ${errorPayload}`
+    );
+  }
+
+  return response.body;
+};
+
 exports.handler = async (event) => {
   try {
-    const { prompt, threadId } = JSON.parse(event.body ?? "{}");
+    const { prompt, threadId, stream } = JSON.parse(event.body ?? "{}");
+    const shouldStream = stream === true || stream === "true";
 
     if (!prompt || typeof prompt !== "string" || prompt.trim() === "") {
       return {
@@ -179,6 +207,56 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: "Prompt vacío o no válido" }),
         headers: { "Content-Type": "application/json" },
       };
+    }
+
+    if (shouldStream) {
+      const streamResponse = new ReadableStream({
+        start: async (controller) => {
+          const encoder = new TextEncoder();
+          try {
+            let currentThreadId = await createThreadIfNeeded(threadId);
+            currentThreadId = await sendUserMessage(currentThreadId, prompt);
+
+            controller.enqueue(
+              encoder.encode(
+                `event: thread\n` +
+                  `data: ${JSON.stringify({ threadId: currentThreadId })}\n\n`
+              )
+            );
+
+            const bodyStream = await openaiStreamRun(currentThreadId);
+            const reader = bodyStream.getReader();
+
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) break;
+              if (value) {
+                controller.enqueue(value);
+              }
+            }
+
+            controller.close();
+          } catch (err) {
+            controller.enqueue(
+              new TextEncoder().encode(
+                `event: error\n` +
+                  `data: ${JSON.stringify({ message: err.message })}\n\n`
+              )
+            );
+            controller.close();
+          }
+        },
+      });
+
+      return new Response(streamResponse, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/event-stream; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
+          Connection: "keep-alive",
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
     }
 
     let currentThreadId = await createThreadIfNeeded(threadId);
