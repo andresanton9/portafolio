@@ -742,7 +742,7 @@ img { max-width: 100%; height: auto; }
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px hsla(250, 75%, 60%, 0.1);
 }
-.form-response-note i { color: var(--primary-color); }
+.form-response-note i { color: var(--primary-color); padding-top: 10px; }
 
 /* ===== FOOTER SECTION STYLES (Adaptado a Dark Theme) ===== */
 .footer {
@@ -751,7 +751,8 @@ img { max-width: 100%; height: auto; }
     padding-top: 4rem;
     margin-top: 4rem;
 }
-.footer__container { grid-template-columns: 2fr 1fr 1fr; gap: 3rem; padding-bottom: 3rem; }
+.footer__container { grid-template-columns: 2fr 1fr 1fr; gap: 3rem; padding-bottom: 3rem; margin-left: var(--sidebar-width);
+    transition: margin-left .3s;}
 .footer__logo { font-size: var(--h3-font-size); font-weight: var(--font-bold); color: var(--title-color); margin-bottom: var(--mb-1); display: inline-block; }
 .footer__description { font-size: var(--small-font-size); line-height: 1.6; max-width: 300px; }
 .footer__title { font-size: var(--h3-font-size); margin-bottom: var(--mb-1-5); }
@@ -1214,6 +1215,9 @@ img { max-width: 100%; height: auto; }
 
 /* Tablets pequeñas - Vista móvil a partir de 720px */
 @media screen and (max-width: 720px) {
+    .mobile-hidden {
+        display: none !important;
+    }
     .chatbot__mic, .chatbot__send{
         width: 2rem;
         height: 2rem;
@@ -1367,6 +1371,8 @@ img { max-width: 100%; height: auto; }
     .projects__container,
     .footer__container {
         grid-template-columns: 1fr;
+        margin-left: 0;
+        margin-bottom: 4rem;
     }
 }
 
