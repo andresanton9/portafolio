@@ -134,6 +134,7 @@ const generateResponse = async (conversationId) => {
   const response = await openaiFetch("/responses", {
     method: "POST",
     body: JSON.stringify({
+      model: "gpt-5-nano-2025-08-07",
       conversation_id: conversationId,
     }),
   });
@@ -213,6 +214,7 @@ const openaiStreamResponse = async (conversationId) => {
       Accept: "text/event-stream",
     },
     body: JSON.stringify({
+      model: "gpt-5-nano-2025-08-07",
       conversation_id: conversationId,
       stream: true,
     }),
