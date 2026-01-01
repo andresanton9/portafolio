@@ -12,9 +12,6 @@ const ensureEnv = () => {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY no configurada.");
   }
-  if (!process.env.OPENAI_ASSISTANT_ID) {
-    throw new Error("OPENAI_ASSISTANT_ID no configurada.");
-  }
 };
 
 const openaiFetch = async (path, options = {}) => {
@@ -27,7 +24,6 @@ const openaiFetch = async (path, options = {}) => {
     headers: {
       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       "Content-Type": "application/json",
-      "OpenAI-Beta": "assistants=v2",
       ...customHeaders,
     },
   };
@@ -49,139 +45,175 @@ const openaiFetch = async (path, options = {}) => {
   return payload;
 };
 
-const createThreadIfNeeded = async (threadId) => {
-  if (threadId) return threadId;
-  const created = await openaiFetch("/threads", {
+const createConversationIfNeeded = async (conversationId) => {
+  if (conversationId) {
+    // Verificar si la conversación existe
+    try {
+      await openaiFetch(`/conversations/${conversationId}`);
+      return conversationId;
+    } catch (error) {
+      // Si no existe, crear una nueva
+      if (error.message.includes("404") || error.message.includes("not found")) {
+        const created = await openaiFetch("/conversations", {
+          method: "POST",
+          body: JSON.stringify({}),
+        });
+        return created.id;
+      }
+      throw error;
+    }
+  }
+  
+  const created = await openaiFetch("/conversations", {
     method: "POST",
     body: JSON.stringify({}),
   });
   return created.id;
 };
 
-const sendUserMessage = async (threadId, prompt) => {
+const sendUserMessage = async (conversationId, prompt) => {
   try {
-    await openaiFetch(`/threads/${threadId}/messages`, {
+    await openaiFetch(`/conversations/${conversationId}/items`, {
       method: "POST",
       body: JSON.stringify({
-        role: "user",
-        content: [
+        items: [
           {
-            type: "text",
-            text: prompt,
+            type: "message",
+            role: "user",
+            content: [
+              {
+                type: "input_text",
+                text: prompt,
+              },
+            ],
           },
         ],
       }),
     });
-    return threadId;
+    return conversationId;
   } catch (error) {
-    const needsNewThread =
+    const needsNewConversation =
       typeof error.message === "string" &&
       (error.message.includes("404") ||
         error.message.includes("not found") ||
-        error.message.includes("invalid thread"));
+        error.message.includes("invalid conversation"));
 
-    if (!needsNewThread) {
+    if (!needsNewConversation) {
       throw error;
     }
 
-    const created = await openaiFetch("/threads", {
+    const created = await openaiFetch("/conversations", {
       method: "POST",
       body: JSON.stringify({}),
     });
 
-    const newThreadId = created.id;
-    await openaiFetch(`/threads/${newThreadId}/messages`, {
+    const newConversationId = created.id;
+    await openaiFetch(`/conversations/${newConversationId}/items`, {
       method: "POST",
       body: JSON.stringify({
-        role: "user",
-        content: [
+        items: [
           {
-            type: "text",
-            text: prompt,
+            type: "message",
+            role: "user",
+            content: [
+              {
+                type: "input_text",
+                text: prompt,
+              },
+            ],
           },
         ],
       }),
     });
 
-    return newThreadId;
+    return newConversationId;
   }
 };
 
-const runAssistant = async (threadId) => {
-  const run = await openaiFetch(`/threads/${threadId}/runs`, {
+const generateResponse = async (conversationId) => {
+  const response = await openaiFetch("/responses", {
     method: "POST",
     body: JSON.stringify({
-      assistant_id: process.env.OPENAI_ASSISTANT_ID,
+      conversation_id: conversationId,
     }),
   });
 
-  let finalRun = run;
+  let finalResponse = response;
   const maxRetries = 10;
   let attempt = 0;
   let delay = 1000;
 
+  // Si la respuesta tiene un status, esperar hasta que esté completada
   while (
-    (finalRun.status === "queued" || finalRun.status === "in_progress") &&
+    finalResponse.status &&
+    (finalResponse.status === "queued" || finalResponse.status === "in_progress") &&
     attempt < maxRetries
   ) {
     await sleep(delay);
     attempt += 1;
     delay = Math.min(5000, delay * 1.8);
-    finalRun = await openaiFetch(`/threads/${threadId}/runs/${run.id}`);
+    if (finalResponse.id) {
+      finalResponse = await openaiFetch(`/responses/${finalResponse.id}`);
+    } else {
+      break;
+    }
   }
 
-  return finalRun;
+  return finalResponse;
 };
 
-const extractTextFromMessage = (message) => {
-  if (!message || !Array.isArray(message.content)) {
+const extractTextFromItem = (item) => {
+  if (!item || !Array.isArray(item.content)) {
     return "";
   }
 
   const chunks = [];
 
-  for (const block of message.content) {
-    if (block.type === "text" && block.text?.value) {
-      chunks.push(block.text.value);
-    } else if (block.type === "output_text" && typeof block.text === "string") {
-      chunks.push(block.text);
-    } else if (block.type === "output_text" && block.text?.value) {
-      chunks.push(block.text.value);
-    } else if (typeof block.text === "string") {
-      chunks.push(block.text);
+  for (const block of item.content) {
+    if (block.type === "output_text") {
+      if (typeof block.text === "string") {
+        chunks.push(block.text);
+      } else if (block.text?.value) {
+        chunks.push(block.text.value);
+      } else if (block.text) {
+        chunks.push(String(block.text));
+      }
+    } else if (block.type === "input_text" && block.text) {
+      // Para mensajes de usuario (no debería usarse aquí, pero por seguridad)
+      chunks.push(typeof block.text === "string" ? block.text : String(block.text));
     }
   }
 
   return chunks.join("\n").trim();
 };
 
-const fetchAssistantReply = async (threadId) => {
-  const messages = await openaiFetch(`/threads/${threadId}/messages?limit=20`);
-  const assistantMessages = (messages.data || [])
-    .filter((message) => message.role === "assistant")
-    .sort((a, b) => a.created_at - b.created_at);
+const fetchAssistantReply = async (conversationId) => {
+  const itemsResponse = await openaiFetch(`/conversations/${conversationId}/items?limit=20&order=desc`);
+  const items = itemsResponse.data || [];
+  
+  // Buscar el último mensaje del asistente
+  const assistantItems = items.filter((item) => item.role === "assistant" && item.type === "message");
 
-  if (!assistantMessages.length) {
+  if (!assistantItems.length) {
     return "";
   }
 
-  const lastMessage = assistantMessages[assistantMessages.length - 1];
-  return extractTextFromMessage(lastMessage);
+  const lastItem = assistantItems[0]; // Ya están ordenados desc
+  return extractTextFromItem(lastItem);
 };
 
-const openaiStreamRun = async (threadId) => {
+const openaiStreamResponse = async (conversationId) => {
   ensureEnv();
 
-  const response = await fetchWithFallback(`${API_BASE}/threads/${threadId}/runs`, {
+  const response = await fetchWithFallback(`${API_BASE}/responses`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       "Content-Type": "application/json",
       Accept: "text/event-stream",
-      "OpenAI-Beta": "assistants=v2",
     },
     body: JSON.stringify({
-      assistant_id: process.env.OPENAI_ASSISTANT_ID,
+      conversation_id: conversationId,
       stream: true,
     }),
   });
@@ -201,6 +233,9 @@ exports.handler = async (event) => {
     const { prompt, threadId, stream } = JSON.parse(event.body ?? "{}");
     const shouldStream = stream === true || stream === "true";
 
+    // Mantener compatibilidad con threadId pero usar conversationId internamente
+    const conversationId = threadId;
+
     if (!prompt || typeof prompt !== "string" || prompt.trim() === "") {
       return {
         statusCode: 400,
@@ -214,17 +249,17 @@ exports.handler = async (event) => {
         start: async (controller) => {
           const encoder = new TextEncoder();
           try {
-            let currentThreadId = await createThreadIfNeeded(threadId);
-            currentThreadId = await sendUserMessage(currentThreadId, prompt);
+            let currentConversationId = await createConversationIfNeeded(conversationId);
+            currentConversationId = await sendUserMessage(currentConversationId, prompt);
 
             controller.enqueue(
               encoder.encode(
-                `event: thread\n` +
-                  `data: ${JSON.stringify({ threadId: currentThreadId })}\n\n`
+                `event: conversation\n` +
+                  `data: ${JSON.stringify({ threadId: currentConversationId, conversationId: currentConversationId })}\n\n`
               )
             );
 
-            const bodyStream = await openaiStreamRun(currentThreadId);
+            const bodyStream = await openaiStreamResponse(currentConversationId);
             const reader = bodyStream.getReader();
 
             while (true) {
@@ -259,25 +294,30 @@ exports.handler = async (event) => {
       });
     }
 
-    let currentThreadId = await createThreadIfNeeded(threadId);
-    currentThreadId = await sendUserMessage(currentThreadId, prompt);
-    const finalRun = await runAssistant(currentThreadId);
+    let currentConversationId = await createConversationIfNeeded(conversationId);
+    currentConversationId = await sendUserMessage(currentConversationId, prompt);
+    const finalResponse = await generateResponse(currentConversationId);
 
-    if (finalRun.status !== "completed") {
+    // Si hay un error en el estado de la respuesta
+    if (finalResponse.status && finalResponse.status !== "completed") {
       return {
         statusCode: 500,
         body: JSON.stringify({
-          error: `Run terminado con estado inesperado: ${finalRun.status}`,
+          error: `Respuesta terminada con estado inesperado: ${finalResponse.status}`,
         }),
         headers: { "Content-Type": "application/json" },
       };
     }
 
-    const textReply = await fetchAssistantReply(currentThreadId);
+    const textReply = await fetchAssistantReply(currentConversationId);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ reply: textReply, threadId: currentThreadId }),
+      body: JSON.stringify({ 
+        reply: textReply, 
+        threadId: currentConversationId,
+        conversationId: currentConversationId 
+      }),
       headers: { "Content-Type": "application/json" },
     };
   } catch (error) {
