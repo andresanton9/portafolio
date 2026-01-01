@@ -1254,4 +1254,248 @@ if (chatbotMic) {
         chatbotMic.addEventListener('click', toggleRecording);
     }
 }
+
+/*=============== CONTACT FORM HANDLING ===============*/
+const contactForm = document.querySelector('.contact__form');
+if (contactForm) {
+    contactForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        
+        const formData = {
+            name: document.getElementById('name').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            subject: document.getElementById('subject').value.trim(),
+            message: document.getElementById('message').value.trim()
+        };
+
+        // Validación básica
+        if (!formData.name || !formData.email || !formData.message) {
+            alert(currentLang === 'es' 
+                ? 'Por favor, completa todos los campos requeridos.' 
+                : 'Please fill in all required fields.');
+            return;
+        }
+
+        // Deshabilitar el formulario mientras se envía
+        const submitButton = contactForm.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.textContent;
+        submitButton.disabled = true;
+        submitButton.textContent = currentLang === 'es' ? 'Enviando...' : 'Sending...';
+
+        try {
+            const response = await fetch('/.netlify/functions/send-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                // Éxito
+                alert(currentLang === 'es' 
+                    ? '¡Mensaje enviado correctamente! Te responderé pronto.' 
+                    : 'Message sent successfully! I\'ll get back to you soon.');
+                
+                // Limpiar el formulario
+                contactForm.reset();
+                
+                // Track del evento de envío exitoso
+                trackEvent('form_submit', {
+                    element: 'contact_form',
+                    section: 'contact',
+                    success: true
+                });
+            } else {
+                // Error
+                throw new Error(data.error || 'Error al enviar el mensaje');
+            }
+        } catch (error) {
+            console.error('Error sending email:', error);
+            alert(currentLang === 'es' 
+                ? 'Error al enviar el mensaje. Por favor, inténtalo de nuevo o contáctame directamente en ndresanton9@gmail.com' 
+                : 'Error sending message. Please try again or contact me directly at ndresanton9@gmail.com');
+            
+            // Track del error
+            trackEvent('form_submit', {
+                element: 'contact_form',
+                section: 'contact',
+                success: false,
+                error: error.message
+            });
+        } finally {
+            // Rehabilitar el formulario
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+        }
+    });
+}
+
+/*=============== EVENT TRACKING SYSTEM ===============*/
+const trackEvent = async (eventType, data = {}) => {
+    try {
+        const eventData = {
+            eventType,
+            element: data.element || null,
+            section: data.section || getCurrentSection(),
+            url: window.location.href,
+            timestamp: new Date().toISOString(),
+            additionalData: {
+                ...data,
+                viewport: {
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                },
+                language: currentLang,
+                userAgent: navigator.userAgent
+            }
+        };
+
+        // Enviar evento al servidor
+        await fetch('/.netlify/functions/track-event', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(eventData),
+        });
+    } catch (error) {
+        // Silenciar errores de tracking para no afectar la experiencia del usuario
+        console.warn('Error tracking event:', error);
+    }
+};
+
+// Función para obtener la sección actual
+const getCurrentSection = () => {
+    const sections = document.querySelectorAll('section[id]');
+    const scrollY = window.pageYOffset;
+    const offset = 200;
+
+    for (const section of sections) {
+        const sectionTop = section.offsetTop - offset;
+        const sectionHeight = section.offsetHeight;
+        
+        if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            return section.id || 'unknown';
+        }
+    }
+    return 'home';
+};
+
+// Track pageview al cargar
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        trackEvent('pageview', {
+            section: 'home',
+            element: 'page_load'
+        });
+    });
+} else {
+    trackEvent('pageview', {
+        section: 'home',
+        element: 'page_load'
+    });
+}
+
+// Track clicks en enlaces de navegación
+const trackableLinks = document.querySelectorAll('.nav__link, .home__buttons a, .footer__link');
+trackableLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        const text = link.textContent.trim();
+        
+        trackEvent('click', {
+            element: 'navigation_link',
+            section: getCurrentSection(),
+            target: href,
+            linkText: text
+        });
+    });
+});
+
+// Track clicks en botones y elementos interactivos
+const interactiveElements = document.querySelectorAll('button, .btn, .chatbot__toggle, .chatbot__close, .project-card');
+interactiveElements.forEach(element => {
+    element.addEventListener('click', (e) => {
+        const elementClass = element.className || '';
+        const elementId = element.id || '';
+        const elementText = element.textContent?.trim() || '';
+        
+        trackEvent('click', {
+            element: elementClass || elementId || 'interactive_element',
+            section: getCurrentSection(),
+            elementText: elementText.substring(0, 50) // Limitar longitud
+        });
+    });
+});
+
+// Track scroll para ver qué secciones se visitan
+let lastScrollY = window.pageYOffset;
+let scrollTimeout = null;
+let visitedSections = new Set();
+
+window.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    
+    scrollTimeout = setTimeout(() => {
+        const currentSection = getCurrentSection();
+        
+        // Track solo si es una nueva sección visitada
+        if (!visitedSections.has(currentSection)) {
+            visitedSections.add(currentSection);
+            trackEvent('section_view', {
+                element: 'scroll',
+                section: currentSection,
+                scrollY: window.pageYOffset
+            });
+        }
+    }, 500); // Debounce de 500ms
+});
+
+// Track cuando el usuario abandona la página
+window.addEventListener('beforeunload', () => {
+    // Usar sendBeacon para asegurar que se envíe incluso si la página se cierra
+    const eventData = {
+        eventType: 'page_exit',
+        element: 'page_unload',
+        section: getCurrentSection(),
+        url: window.location.href,
+        timestamp: new Date().toISOString(),
+        timeOnPage: Math.round((Date.now() - performance.timing.navigationStart) / 1000)
+    };
+
+    if (navigator.sendBeacon) {
+        navigator.sendBeacon(
+            '/.netlify/functions/track-event',
+            JSON.stringify(eventData)
+        );
+    }
+});
+
+// Track interacciones con el chatbot
+const chatbotElements = document.querySelectorAll('#chatbot-toggle, #chatbot-close, #chatbot-form');
+chatbotElements.forEach(element => {
+    element.addEventListener('click', (e) => {
+        trackEvent('chatbot_interaction', {
+            element: element.id || element.className,
+            section: getCurrentSection(),
+            action: e.type
+        });
+    });
+});
+
+// Track cuando se envía un mensaje en el chatbot (ya existe el handler, solo agregamos tracking)
+const originalChatbotSubmit = document.querySelector('#chatbot-form');
+if (originalChatbotSubmit) {
+    const originalHandler = originalChatbotSubmit.onsubmit;
+    originalChatbotSubmit.addEventListener('submit', () => {
+        trackEvent('chatbot_message', {
+            element: 'chatbot_form',
+            section: 'chatbot',
+            action: 'message_sent'
+        });
+    }, true);
+}
   
