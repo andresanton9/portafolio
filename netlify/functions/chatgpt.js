@@ -1,3 +1,5 @@
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 const API_BASE = "https://api.openai.com/v1";
 const fetchWithFallback = (...args) => {
   if (typeof globalThis.fetch === "function") {
@@ -43,139 +45,56 @@ const openaiFetch = async (path, options = {}) => {
   return payload;
 };
 
-const createConversationIfNeeded = async (conversationId) => {
-  if (conversationId) {
-    // Verificar si la conversación existe
-    try {
-      await openaiFetch(`/conversations/${conversationId}`);
-      return conversationId;
-    } catch (error) {
-      // Si no existe, crear una nueva
-      if (error.message.includes("404") || error.message.includes("not found")) {
-        const created = await openaiFetch("/conversations", {
-          method: "POST",
-          body: JSON.stringify({}),
-        });
-        return created.id;
-      }
-      throw error;
-    }
-  }
-  
-  const created = await openaiFetch("/conversations", {
-    method: "POST",
-    body: JSON.stringify({}),
-  });
-  return created.id;
-};
-
-const sendUserMessage = async (conversationId, prompt) => {
-  try {
-    await openaiFetch(`/conversations/${conversationId}/items`, {
-      method: "POST",
-      body: JSON.stringify({
-        items: [
-          {
-            type: "message",
-            role: "user",
-            content: [
-              {
-                type: "input_text",
-                text: prompt,
-              },
-            ],
-          },
-        ],
-      }),
-    });
-    return conversationId;
-  } catch (error) {
-    const needsNewConversation =
-      typeof error.message === "string" &&
-      (error.message.includes("404") ||
-        error.message.includes("not found") ||
-        error.message.includes("invalid conversation"));
-
-    if (!needsNewConversation) {
-      throw error;
-    }
-
-    const created = await openaiFetch("/conversations", {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
-
-    const newConversationId = created.id;
-    await openaiFetch(`/conversations/${newConversationId}/items`, {
-      method: "POST",
-      body: JSON.stringify({
-        items: [
-          {
-            type: "message",
-            role: "user",
-            content: [
-              {
-                type: "input_text",
-                text: prompt,
-              },
-            ],
-          },
-        ],
-      }),
-    });
-
-    return newConversationId;
-  }
-};
-
-const getConversationItemsAsInput = async (conversationId) => {
-  try {
-    const itemsResponse = await openaiFetch(`/conversations/${conversationId}/items?limit=100&order=asc`);
-    const items = itemsResponse.data || [];
-    
-    // Convertir items de conversación al formato input del Responses API
-    const input = items
-      .filter((item) => item.type === "message" && (item.role === "user" || item.role === "assistant"))
-      .map((item) => {
-        const content = Array.isArray(item.content) 
-          ? item.content.map((block) => {
-              if (block.type === "input_text" || block.type === "output_text") {
-                return block.text || "";
-              }
-              return "";
-            }).filter(Boolean).join("")
-          : "";
-        
-        return {
-          role: item.role,
-          content: content,
-        };
-      })
-      .filter((msg) => msg.content); // Filtrar mensajes vacíos
-    
-    return input;
-  } catch (error) {
-    console.error("Error obteniendo items de conversación:", error);
-    return [];
-  }
-};
-
-const openaiStreamResponse = async (conversationId) => {
-  ensureEnv();
-  const model = "gpt-5-nano-2025-08-07";
-
-  // Obtener todos los mensajes de la conversación para pasarlos como input
-  const input = await getConversationItemsAsInput(conversationId);
-
-  const requestBody = {
-    model: model,
-    input: input,
-    stream: true,
+const createResponse = async (input, previousResponseId = null, model = "gpt-4o") => {
+  const body = {
+    model,
+    input,
+    store: true, // Mantener estado entre turnos
   };
 
-  // Agregar conversation_id si está disponible para mantener el contexto
-  if (conversationId) {
-    requestBody.conversation_id = conversationId;
+  // Si hay una respuesta previa, la pasamos para mantener el contexto
+  if (previousResponseId) {
+    body.previous_response_id = previousResponseId;
+  }
+
+  return await openaiFetch("/responses", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+};
+
+const extractTextFromResponse = (response) => {
+  if (!response || !Array.isArray(response.output)) {
+    return "";
+  }
+
+  const chunks = [];
+
+  for (const item of response.output) {
+    if (item.type === "message" && Array.isArray(item.content)) {
+      for (const block of item.content) {
+        if (block.type === "output_text" && block.text) {
+          chunks.push(block.text);
+        }
+      }
+    }
+  }
+
+  return chunks.join("\n").trim();
+};
+
+const openaiStreamResponse = async (input, previousResponseId = null, model = "gpt-4o") => {
+  ensureEnv();
+
+  const body = {
+    model,
+    input,
+    stream: true,
+    store: true,
+  };
+
+  if (previousResponseId) {
+    body.previous_response_id = previousResponseId;
   }
 
   const response = await fetchWithFallback(`${API_BASE}/responses`, {
@@ -185,7 +104,7 @@ const openaiStreamResponse = async (conversationId) => {
       "Content-Type": "application/json",
       Accept: "text/event-stream",
     },
-    body: JSON.stringify(requestBody),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok || !response.body) {
@@ -200,10 +119,9 @@ const openaiStreamResponse = async (conversationId) => {
 
 exports.handler = async (event) => {
   try {
-    const { prompt, threadId } = JSON.parse(event.body ?? "{}");
-
-    // Mantener compatibilidad con threadId pero usar conversationId internamente
-    const conversationId = threadId;
+    const { prompt, previousResponseId, stream, model } = JSON.parse(event.body ?? "{}");
+    const shouldStream = stream === true || stream === "true";
+    const modelToUse = model || "gpt-4o";
 
     if (!prompt || typeof prompt !== "string" || prompt.trim() === "") {
       return {
@@ -213,37 +131,93 @@ exports.handler = async (event) => {
       };
     }
 
-    let currentConversationId = await createConversationIfNeeded(conversationId);
-    currentConversationId = await sendUserMessage(currentConversationId, prompt);
+    if (shouldStream) {
+      const streamResponse = new ReadableStream({
+        start: async (controller) => {
+          const encoder = new TextEncoder();
+          try {
+            const bodyStream = await openaiStreamResponse(prompt, previousResponseId, modelToUse);
+            const reader = bodyStream.getReader();
 
-    // Procesar el stream completo y devolverlo
-    const bodyStream = await openaiStreamResponse(currentConversationId);
-    const reader = bodyStream.getReader();
-    const decoder = new TextDecoder();
-    let streamData = `event: conversation\n` +
-      `data: ${JSON.stringify({ threadId: currentConversationId, conversationId: currentConversationId })}\n\n`;
+            let responseId = null;
+            let buffer = "";
 
-    try {
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        if (value) {
-          streamData += decoder.decode(value, { stream: true });
-        }
-      }
-    } finally {
-      reader.releaseLock();
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) break;
+              
+              if (value) {
+                buffer += new TextDecoder().decode(value, { stream: true });
+                const lines = buffer.split("\n");
+                buffer = lines.pop() || "";
+
+                for (const line of lines) {
+                  if (line.startsWith("data: ")) {
+                    try {
+                      const data = JSON.parse(line.slice(6));
+                      
+                      // Extraer response_id del primer evento
+                      if (data.id && !responseId) {
+                        responseId = data.id;
+                        controller.enqueue(
+                          encoder.encode(
+                            `event: response\n` +
+                              `data: ${JSON.stringify({ responseId: responseId })}\n\n`
+                          )
+                        );
+                      }
+                    } catch (e) {
+                      // Ignorar errores de parsing
+                    }
+                  }
+                  
+                  // Reenviar la línea original
+                  controller.enqueue(encoder.encode(line + "\n"));
+                }
+              }
+            }
+
+            // Enviar el buffer restante
+            if (buffer) {
+              controller.enqueue(encoder.encode(buffer));
+            }
+
+            controller.close();
+          } catch (err) {
+            controller.enqueue(
+              new TextEncoder().encode(
+                `event: error\n` +
+                  `data: ${JSON.stringify({ message: err.message })}\n\n`
+              )
+            );
+            controller.close();
+          }
+        },
+      });
+
+      return new Response(streamResponse, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/event-stream; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
+          Connection: "keep-alive",
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
     }
+
+    // Modo no-streaming
+    const response = await createResponse(prompt, previousResponseId, modelToUse);
+    const textReply = extractTextFromResponse(response);
 
     return {
       statusCode: 200,
-      body: streamData,
-      headers: {
-        "Content-Type": "text/event-stream; charset=utf-8",
-        "Cache-Control": "no-cache, no-transform",
-        Connection: "keep-alive",
-        "Access-Control-Allow-Origin": "*",
-      },
+      body: JSON.stringify({ 
+        reply: textReply, 
+        responseId: response.id,
+        previousResponseId: previousResponseId || null
+      }),
+      headers: { "Content-Type": "application/json" },
     };
   } catch (error) {
     console.error("Error handler:", error);

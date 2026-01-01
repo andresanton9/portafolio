@@ -201,42 +201,42 @@ if (typeof updateContactAos === 'function') {
 
 async function pedirChatGPT(prompt) {
     try {
-        const rawThreadData = localStorage.getItem('chatgptThreadId');
-        let storedThreadId = null;
+        const rawResponseData = localStorage.getItem('chatgptResponseId');
+        let storedResponseId = null;
 
-        if (rawThreadData) {
+        if (rawResponseData) {
             try {
-                const parsed = JSON.parse(rawThreadData);
+                const parsed = JSON.parse(rawResponseData);
                 const now = Date.now();
                 const maxAgeMs = 24 * 60 * 60 * 1000; // 24 horas
 
                 if (parsed?.id && parsed?.storedAt && now - parsed.storedAt < maxAgeMs) {
-                    storedThreadId = parsed.id;
+                    storedResponseId = parsed.id;
                 } else {
-                    localStorage.removeItem('chatgptThreadId');
+                    localStorage.removeItem('chatgptResponseId');
                 }
             } catch (parseError) {
-                localStorage.removeItem('chatgptThreadId');
+                localStorage.removeItem('chatgptResponseId');
             }
         }
 
         const response = await fetch("/.netlify/functions/chatgpt", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt, threadId: storedThreadId }),
+            body: JSON.stringify({ prompt, previousResponseId: storedResponseId }),
         });
 
         if (!response.ok) {
             if (response.status === 404 || response.status === 400) {
-                localStorage.removeItem('chatgptThreadId');
+                localStorage.removeItem('chatgptResponseId');
             }
             throw new Error(`Error HTTP ${response.status}`);
         }
 
         const data = await response.json();
-        if (data?.threadId) {
-            localStorage.setItem('chatgptThreadId', JSON.stringify({
-                id: data.threadId,
+        if (data?.responseId) {
+            localStorage.setItem('chatgptResponseId', JSON.stringify({
+                id: data.responseId,
                 storedAt: Date.now(),
             }));
         }
