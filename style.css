@@ -863,18 +863,23 @@ img { max-width: 100%; height: auto; }
     border: 1px solid var(--border-color);
     overflow: hidden;
     opacity: 0;
-    pointer-events: none;
+    pointer-events: none !important;
     transform: translateY(18px) scale(0.98);
     transition: opacity 0.3s ease, transform 0.3s ease;
-    display: flex;
+    display: none;
     flex-direction: column;
     min-height: 360px;
     max-height: min(600px, 75vh);
 }
 .chatbot__panel.is-open {
+    display: flex;
     opacity: 1;
-    pointer-events: auto;
+    pointer-events: auto !important;
     transform: translateY(0) scale(1);
+}
+.chatbot__panel[aria-hidden="true"] {
+    display: none !important;
+    pointer-events: none !important;
 }
 .chatbot__header {
     display: flex;
