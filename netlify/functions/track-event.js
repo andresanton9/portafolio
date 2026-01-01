@@ -27,12 +27,18 @@ const getReferer = (event) => {
 // Función para guardar en Netlify DB (Neon PostgreSQL)
 const saveToNetlifyDB = async (eventData, serverTimestamp) => {
   try {
+    // Verificar que NETLIFY_DATABASE_URL esté disponible
+    if (!process.env.NETLIFY_DATABASE_URL) {
+      console.warn("NETLIFY_DATABASE_URL no está disponible");
+      return { success: false, error: "NETLIFY_DATABASE_URL not configured" };
+    }
+
     // Importar @netlify/neon dinámicamente
     const { neon } = await import("@netlify/neon");
     const sql = neon(); // Automáticamente usa NETLIFY_DATABASE_URL
     
     // Insertar el evento en la base de datos
-    await sql`
+    const result = await sql`
       INSERT INTO events (
         event_type,
         element,
@@ -64,10 +70,16 @@ const saveToNetlifyDB = async (eventData, serverTimestamp) => {
       )
     `;
     
-    return true;
+    console.log("Event saved to Netlify DB successfully");
+    return { success: true, result };
   } catch (error) {
     console.error("Error saving to Netlify DB:", error);
-    return false;
+    console.error("Error details:", {
+      message: error.message,
+      stack: error.stack,
+      eventType: eventData.eventType
+    });
+    return { success: false, error: error.message };
   }
 };
 
@@ -127,8 +139,14 @@ exports.handler = async (event) => {
 
     // Opción 1: Guardar en Netlify DB (Neon PostgreSQL) - RECOMENDADO si tienes Netlify DB configurado
     // Netlify DB usa automáticamente NETLIFY_DATABASE_URL si está disponible
+    let dbSaveResult = null;
     if (process.env.NETLIFY_DATABASE_URL) {
-      await saveToNetlifyDB(eventData, serverTimestamp);
+      dbSaveResult = await saveToNetlifyDB(eventData, serverTimestamp);
+      if (!dbSaveResult.success) {
+        console.error("Failed to save to Netlify DB:", dbSaveResult.error);
+      }
+    } else {
+      console.warn("NETLIFY_DATABASE_URL no está configurada. Los eventos no se guardarán en la BD.");
     }
 
     // Opción 2: Guardar en un servicio externo (ejemplo con un webhook)
@@ -270,7 +288,9 @@ exports.handler = async (event) => {
       body: JSON.stringify({ 
         success: true, 
         message: "Event tracked successfully",
-        eventId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        eventId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        savedToDB: dbSaveResult?.success || false,
+        dbError: dbSaveResult?.error || null
       }),
       headers: { 
         "Content-Type": "application/json",

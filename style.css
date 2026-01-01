@@ -735,6 +735,14 @@ img { max-width: 100%; height: auto; }
     color: var(--text-color);
     transition: all 0.3s;
     width: 100%;
+    pointer-events: auto !important;
+    z-index: 1;
+    position: relative;
+}
+.form-group input:disabled,
+.form-group textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 .form-group input:focus,
 .form-group textarea:focus {
