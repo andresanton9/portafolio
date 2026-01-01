@@ -257,16 +257,83 @@ const translations = {
         journeyText3Desktop: 'Una habilidad diferenciadora clave es mi experiencia en <strong>Sistemas de Información Geográfica (GIS)</strong> usando herramientas como <strong>QGIS y ArcGIS Online</strong> para procesar datos espaciales, ofreciendo insights valiosos para clientes en áreas como predicción agrícola.',
         journeyText3Mobile: 'Diferenciador: análisis GIS avanzado con QGIS y ArcGIS para impulsar insights espaciales.',
         whatIBring: 'Lo que aporto',
+        skillsTechnologies: 'Habilidades y Tecnologías',
+        pythonMastery: '<strong>Python</strong> Dominio y Automatización',
+        cloudMigration: 'Migración a la Nube y Servicios (AWS)',
+        aiIntegration: 'Integración de APIs de IA (Chatbots, Predicción)',
+        geoAnalysis: 'Análisis de Datos Geoespaciales (GIS, QGIS, ArcGIS)',
+        backendDev: 'Desarrollo Backend (Java, Spring Boot, Python)',
+        bigDataTech: 'Tecnologías Big Data (Spark, Kafka, ElasticSearch)',
         // Projects section
         featuredWork: 'Trabajos destacados',
         projectsSubtitleDesktop: 'Proyectos y casos de estudio<br>Una muestra de mi trabajo reciente, desde el concepto hasta el despliegue',
         projectsSubtitleMobile: 'Proyectos seleccionados destacando estrategia hasta despliegue.',
+        // Project descriptions
+        project1Title: 'Predicción de Cosechas con GIS',
+        project1DescDesktop: 'Implementé una solución geoespacial para <strong>Congelados de Navarra</strong> que involucra detección de caída de vegetación y predicción de cosechas (estimación de kilos). Esto requirió habilidades avanzadas en <strong>QGIS y ArcGIS Online</strong> para análisis preciso de datos espaciales.',
+        project1DescMobile: 'Congelados de Navarra: análisis GIS prediciendo rendimientos de cosecha con QGIS/ArcGIS.',
+        project2Title: 'Desarrollo de Chatbots IA y Automatización Interna',
+        project2DescDesktop: 'Diseñé y desplegué numerosos <strong>chatbots con IA</strong> internos usando varias APIs de IA. Esto se combinó con automatización extensa de procesos en los flujos de trabajo de la empresa, demostrando dominio en <strong>Python</strong> para scripting complejo e integración.',
+        project2DescMobile: 'Chatbots IA + automatización Python optimizando operaciones internas.',
+        project3Title: 'Teledetección y Automatización GIS (Congelados de Navarra)',
+        project3DescDesktop: 'Entregué un flujo de trabajo de teledetección de extremo a extremo para <strong>Congelados de Navarra</strong>, combinando detección de caída de vegetación, pronóstico de cosechas e informes automatizados. El pipeline ingiere escenas satelitales, construye índices espectrales y envía alertas usando <strong>QGIS, ArcGIS Online</strong> y orquestación Python.',
+        project3DescMobile: 'Teledetección + automatización GIS pronosticando pérdida de vegetación y rendimientos.',
+        project4Title: 'Reingeniería Backend Nematool y Migración AWS',
+        project4DescDesktop: 'Lideré la reingeniería completa del backend de la plataforma Nematool usando técnicas de <strong>ingeniería inversa</strong>. Desarrollé una nueva aplicación web y gestioné la migración completa del sistema a <strong>Amazon Web Services (AWS)</strong> para escalabilidad y rendimiento.',
+        project4DescMobile: 'Nematool reconstruido de extremo a extremo: backend de ingeniería inversa, nueva app web y migración AWS.',
+        project5Title: 'Planificador Keylines para Viñedos (Bayer)',
+        project5DescDesktop: 'Construí una aplicación web para diseñar <strong>keylines</strong> de viñedos sobre topografía de alta resolución. Una interfaz <strong>PHP</strong> se conecta a un backend <strong>Python</strong> que calcula líneas de contorno, optimiza patrones de drenaje y exporta planes de plantación listos para campo.',
+        project5DescMobile: 'Planificador Keylines con frontend PHP y cálculos geoespaciales Python.',
+        project6Title: 'Monitoreo y Reportes de Datos SCADA',
+        project6DescDesktop: 'Desarrollé funciones de monitoreo y reportes para sistemas SCADA en la plataforma Ignition, utilizando <strong>Python, SQL Server y JavaScript</strong> para asegurar adquisición precisa de datos industriales y generación de informes.',
+        project6DescMobile: 'Monitoreo y reportes SCADA en Ignition usando Python + SQL Server.',
         // Experience section
         careerJourney: 'Trayectoria profesional',
         experienceSubtitleDesktop: 'Experiencia profesional<br>Una línea de tiempo de mi crecimiento y contribuciones en la industria tecnológica',
         experienceSubtitleMobile: 'Hitos clave que dan forma a mi trayectoria tecnológica.',
         fullTime: 'Tiempo completo',
         education: 'Educación',
+        spain: 'España',
+        present: 'Presente',
+        // Experience descriptions
+        exp1Title: 'Ingeniero de Software y Datos',
+        exp1Company: 'Ager Technology',
+        exp1Location: 'Logroño, La Rioja (España)',
+        exp1DescDesktop: 'Impulso automatización inteligente combinando backends Python, datos geoespaciales e IA para transformar operaciones agrícolas y agroalimentarias.',
+        exp1DescMobile: 'Python, GIS e IA entregando automatización inteligente para negocios agrícolas.',
+        exp1Achievement1: '<strong>Backend Python:</strong> <span class="text-desktop">Arquitecto sistemas robustos con bases de datos relacionales (PostgreSQL, MySQL) y no relacionales (MongoDB) que impulsan productos basados en datos.</span><span class="text-mobile">Backends Python con SQL y NoSQL.</span>',
+        exp1Achievement2: '<strong>Nematool:</strong> <span class="text-desktop">Reconstruí todo el backend, entregué un nuevo frontend y habilité integraciones MQTT para telemetría y automatización avanzada.</span><span class="text-mobile">Nuevo backend + MQTT para Nematool.</span>',
+        exp1Achievement3: '<strong>PWAs y Chatbots:</strong> <span class="text-desktop">Construyo múltiples PWAs con React y chatbots conectados a APIs externas (ChatGPT, Gemini) que refuerzan soporte y toma de decisiones.</span><span class="text-mobile">PWAs React y chatbots IA.</span>',
+        exp1Achievement4: '<strong>Automatización:</strong> <span class="text-desktop">Orquesto pipelines de automatización a gran escala aprovechando Python, colas de eventos y flujos de trabajo serverless.</span><span class="text-mobile">Pipelines de automatización complejos.</span>',
+        exp1Achievement5: '<strong>Teledetección:</strong> <span class="text-desktop">Entregó modelos de teledetección y predicción para Congelados de Navarra usando Sentinel, PlanetScope y APIs AgroMonitoring.</span><span class="text-mobile">Pronóstico de cultivos Sentinel/Planet.</span>',
+        exp1Achievement6: '<strong>QGIS e IA:</strong> <span class="text-desktop">Desarrollo plugins QGIS y cuadernos de campo digitales con IA que agilizan el registro agrícola.</span><span class="text-mobile">Plugins QGIS + cuaderno de campo inteligente.</span>',
+        exp1Achievement7: '<strong>Calidad Viñedos:</strong> <span class="text-desktop">Creo una app que estima la calidad de viñedos fusionando índices espectrales con observaciones de campo.</span><span class="text-mobile">App de estimación de calidad de viñedos.</span>',
+        exp1Achievement8: '<strong>Keylines Bayer:</strong> <span class="text-desktop">Produzco planificación automatizada de Keylines para Bayer mediante análisis topográfico y visualización web.</span><span class="text-mobile">Keylines automatizados para Bayer.</span>',
+        exp2Title: 'Desarrollador Full-Stack',
+        exp2Company: 'Bosonit - Tech & Data',
+        exp2DescDesktop: 'Desarrollo colaborativo de aplicaciones full-stack con formación en tecnologías empresariales modernas.',
+        exp2DescMobile: 'Ingeniería full-stack práctica con stacks empresariales.',
+        exp2Achievement1: '<span class="text-desktop">Recibí formación intensiva en desarrollo <strong>Spring Boot</strong>.</span><span class="text-mobile">Bootcamp intensivo Spring Boot.</span>',
+        exp2Achievement2: '<span class="text-desktop">Desarrollé aplicaciones usando una amplia gama de tecnologías: <strong>Java, Angular, Python, Spark, Docker, Kafka, ElasticSearch</strong> y Web Semantics.</span><span class="text-mobile">Construí productos con Java, Angular, Python, Spark, Docker, Kafka y Elastic.</span>',
+        exp2Achievement3: '<span class="text-desktop">Apliqué conceptos de Machine Learning a sistemas Big Data.</span><span class="text-mobile">Apliqué ML a cargas de trabajo big data.</span>',
+        exp3Title: 'Desarrollador de Sistemas SCADA',
+        exp3Company: 'Standard Profil',
+        exp3DescDesktop: 'Enfocado en sistemas de monitoreo y reportes de datos en un entorno industrial.',
+        exp3DescMobile: 'Iniciativas de monitoreo y reportes de datos industriales.',
+        exp3Achievement1: '<span class="text-desktop">Recibí formación formal en la plataforma SCADA <strong>Ignition</strong>.</span><span class="text-mobile">Certificado en Ignition SCADA.</span>',
+        exp3Achievement2: '<span class="text-desktop">Responsable de monitoreo de datos y escritura de informes técnicos.</span><span class="text-mobile">Responsable de monitoreo y reportes de datos industriales.</span>',
+        exp3Achievement3: '<span class="text-desktop">Gané experiencia práctica usando <strong>Python, SQL Server y JavaScript</strong> en un entorno industrial.</span><span class="text-mobile">Práctica con Python, SQL Server y JS en planta.</span>',
+        exp4Title: 'Desarrollador Front-End',
+        exp4Company: 'SDi Digital Group',
+        exp4DescDesktop: 'Enfocado en diseño web, mantenimiento y sistemas de generación de leads.',
+        exp4DescMobile: 'Diseño de experiencia web y soluciones de automatización de leads.',
+        exp4Achievement1: '<span class="text-desktop">Realicé diseño web y mantenimiento para páginas de clientes.</span><span class="text-mobile">Entregué diseño web y mantenimiento para clientes.</span>',
+        exp4Achievement2: '<span class="text-desktop">Implementé un sistema para crear leads de <strong>Wordpress a Odoo</strong>.</span><span class="text-mobile">Automaticé flujo de leads Wordpress → Odoo.</span>',
+        exp4Achievement3: '<span class="text-desktop">Recibí formación básica en <strong>PHP</strong>.</span><span class="text-mobile">Introducido a fundamentos PHP.</span>',
+        exp5Title: 'Grado en Ingeniería Informática',
+        exp5Company: 'Universidad de La Rioja',
+        exp5DescDesktop: 'Completé el grado en Ingeniería Informática, construyendo una base sólida en sistemas de software, programación y gestión de datos.',
+        exp5DescMobile: 'Grado en Ingeniería Informática: base sólida en software, programación y datos.',
         // Contact section
         getInTouchTitle: 'Contáctame',
         contactSubtitleDesktop: 'Trabajemos juntos<br>¿Listo para dar vida a tus ideas? Estoy aquí para ayudarte a construir algo increíble.',
@@ -344,16 +411,83 @@ const translations = {
         journeyText3Desktop: 'A key differentiating skill is my expertise in <strong>Geographic Information Systems (GIS)</strong> using tools like <strong>QGIS and ArcGIS Online</strong> to process spatial data, offering valuable insights for clients in areas like agricultural prediction.',
         journeyText3Mobile: 'Differentiator: advanced GIS analytics with QGIS & ArcGIS to drive spatial insights.',
         whatIBring: 'What I Bring',
+        skillsTechnologies: 'Skills & Technologies',
+        pythonMastery: '<strong>Python</strong> Mastery & Automation',
+        cloudMigration: 'Cloud Migration & Services (AWS)',
+        aiIntegration: 'AI API Integration (Chatbots, Prediction)',
+        geoAnalysis: 'Geo-Spatial Data Analysis (GIS, QGIS, ArcGIS)',
+        backendDev: 'Backend Development (Java, Spring Boot, Python)',
+        bigDataTech: 'Big Data Technologies (Spark, Kafka, ElasticSearch)',
         // Projects section
         featuredWork: 'Featured Work',
         projectsSubtitleDesktop: 'Projects & Case Studies<br>A showcase of my recent work, from concept to deployment',
         projectsSubtitleMobile: 'Selected projects highlighting strategy to deployment.',
+        // Project descriptions
+        project1Title: 'GIS-Powered Harvest Prediction',
+        project1DescDesktop: 'Implemented a geospatial solution for <strong>Congelados de Navarra</strong> involving vegetation fall detection and harvest prediction (kilo estimation). This relied on advanced skills in <strong>QGIS and ArcGIS Online</strong> for accurate spatial data analysis.',
+        project1DescMobile: 'Congelados de Navarra: GIS analytics predicting harvest yields with QGIS/ArcGIS.',
+        project2Title: 'AI Chatbot Development & Internal Automation',
+        project2DescDesktop: 'Designed and deployed numerous internal <strong>AI-powered chatbots</strong> using various AI APIs. This was coupled with extensive process automation across the company\'s workflows, demonstrating mastery in <strong>Python</strong> for complex scripting and integration.',
+        project2DescMobile: 'AI chatbots + Python automation streamlining internal operations.',
+        project3Title: 'Remote Sensing & GIS Automation (Congelados de Navarra)',
+        project3DescDesktop: 'Delivered an end-to-end remote sensing workflow for <strong>Congelados de Navarra</strong>, combining vegetation fall detection, harvest forecasting, and automated reporting. The pipeline ingests satellite scenes, builds spectral indices, and dispatches alerts using <strong>QGIS, ArcGIS Online</strong>, and Python orchestration.',
+        project3DescMobile: 'Remote sensing + GIS automation forecasting vegetation loss and yields.',
+        project4Title: 'Nematool Backend Re-engineering & AWS Migration',
+        project4DescDesktop: 'Led the full re-engineering of the Nematool platform\'s backend using <strong>reverse engineering</strong> techniques. Developed a new web application and managed the complete system migration to <strong>Amazon Web Services (AWS)</strong> for scalability and performance.',
+        project4DescMobile: 'Nematool rebuilt end-to-end: reverse engineered backend, new web app and AWS migration.',
+        project5Title: 'Keylines Planner for Vineyards (Bayer)',
+        project5DescDesktop: 'Built a web application to design vineyard <strong>keylines</strong> over high-resolution topography. A <strong>PHP</strong> interface connects to a <strong>Python</strong> backend that computes contour lines, optimizes drainage patterns, and exports field-ready planting plans.',
+        project5DescMobile: 'Keylines planner with PHP frontend and Python geospatial calculations.',
+        project6Title: 'SCADA System Data Monitoring & Reporting',
+        project6DescDesktop: 'Developed monitoring and reporting features for SCADA systems on the Ignition platform, utilizing <strong>Python, SQL Server, and JavaScript</strong> to ensure accurate industrial data acquisition and report generation.',
+        project6DescMobile: 'SCADA monitoring & reporting on Ignition using Python + SQL Server.',
         // Experience section
         careerJourney: 'Career Journey',
         experienceSubtitleDesktop: 'Professional Experience<br>A timeline of my growth and contributions in the tech industry',
         experienceSubtitleMobile: 'Key milestones shaping my tech journey.',
         fullTime: 'Full-time',
         education: 'Education',
+        spain: 'Spain',
+        present: 'Present',
+        // Experience descriptions
+        exp1Title: 'Software & Data Engineer',
+        exp1Company: 'Ager Technology',
+        exp1Location: 'Logroño, La Rioja (Spain)',
+        exp1DescDesktop: 'I drive intelligent automation by combining Python backends, geospatial data, and AI to transform agricultural and agri-food operations.',
+        exp1DescMobile: 'Python, GIS, and AI delivering smart automation for agri businesses.',
+        exp1Achievement1: '<strong>Python Back-end:</strong> <span class="text-desktop">Architect robust systems with relational databases (PostgreSQL, MySQL) and non-relational databases (MongoDB) that power data-driven products.</span><span class="text-mobile">Python backends with SQL & NoSQL.</span>',
+        exp1Achievement2: '<strong>Nematool:</strong> <span class="text-desktop">Rebuilt the entire backend, delivered a new front-end, and enabled MQTT integrations for telemetry and advanced automation.</span><span class="text-mobile">New backend + MQTT for Nematool.</span>',
+        exp1Achievement3: '<strong>PWAs & Chatbots:</strong> <span class="text-desktop">Build multiple PWAs with React and chatbots connected to external APIs (ChatGPT, Gemini) that reinforce support and decision-making.</span><span class="text-mobile">React PWAs and AI chatbots.</span>',
+        exp1Achievement4: '<strong>Automation:</strong> <span class="text-desktop">Orchestrate large-scale automation pipelines leveraging Python, event queues, and serverless workflows.</span><span class="text-mobile">Complex automation pipelines.</span>',
+        exp1Achievement5: '<strong>Remote Sensing:</strong> <span class="text-desktop">Deliver remote sensing and prediction models for Congelados de Navarra using Sentinel, PlanetScope, and AgroMonitoring APIs.</span><span class="text-mobile">Sentinel/Planet crop forecasting.</span>',
+        exp1Achievement6: '<strong>QGIS & AI:</strong> <span class="text-desktop">Develop QGIS plugins and AI-powered digital field notebooks that streamline agricultural record keeping.</span><span class="text-mobile">QGIS plugins + smart field logbook.</span>',
+        exp1Achievement7: '<strong>Vineyard Quality:</strong> <span class="text-desktop">Create an app that estimates vineyard quality by fusing spectral indices with field observations.</span><span class="text-mobile">Vineyard quality estimation app.</span>',
+        exp1Achievement8: '<strong>Keylines Bayer:</strong> <span class="text-desktop">Produce automated Keyline planning for Bayer through topographic analysis and web visualization.</span><span class="text-mobile">Automated Keylines for Bayer.</span>',
+        exp2Title: 'Full-Stack Developer',
+        exp2Company: 'Bosonit - Tech & Data',
+        exp2DescDesktop: 'Collaborative development of full-stack applications with training in modern enterprise technologies.',
+        exp2DescMobile: 'Hands-on full-stack engineering with enterprise stacks.',
+        exp2Achievement1: '<span class="text-desktop">Received intensive training in <strong>Spring Boot</strong> development.</span><span class="text-mobile">Intensive Spring Boot bootcamp.</span>',
+        exp2Achievement2: '<span class="text-desktop">Developed applications using a wide range of technologies: <strong>Java, Angular, Python, Spark, Docker, Kafka, ElasticSearch</strong>, and Web Semantics.</span><span class="text-mobile">Built products across Java, Angular, Python, Spark, Docker, Kafka and Elastic.</span>',
+        exp2Achievement3: '<span class="text-desktop">Applied Machine Learning concepts to Big Data systems.</span><span class="text-mobile">Applied ML to big data workloads.</span>',
+        exp3Title: 'SCADA Systems Developer',
+        exp3Company: 'Standard Profil',
+        exp3DescDesktop: 'Focused on data monitoring and reporting systems within an industrial setting.',
+        exp3DescMobile: 'Industrial data monitoring and reporting initiatives.',
+        exp3Achievement1: '<span class="text-desktop">Received formal training in the <strong>Ignition</strong> SCADA platform.</span><span class="text-mobile">Certified on Ignition SCADA.</span>',
+        exp3Achievement2: '<span class="text-desktop">Responsible for data monitoring and writing technical reports.</span><span class="text-mobile">Owned industrial data monitoring and reporting.</span>',
+        exp3Achievement3: '<span class="text-desktop">Gained practical experience using <strong>Python, SQL Server, and JavaScript</strong> in an industrial environment.</span><span class="text-mobile">Hands-on with Python, SQL Server & JS on shop floor.</span>',
+        exp4Title: 'Front-End Developer',
+        exp4Company: 'SDi Digital Group',
+        exp4DescDesktop: 'Focused on web design, maintenance, and lead generation systems.',
+        exp4DescMobile: 'Web experience design and lead automation solutions.',
+        exp4Achievement1: '<span class="text-desktop">Performed web design and maintenance for client pages.</span><span class="text-mobile">Delivered client web design & upkeep.</span>',
+        exp4Achievement2: '<span class="text-desktop">Implemented a system for creating leads from <strong>Wordpress to Odoo</strong>.</span><span class="text-mobile">Automated Wordpress → Odoo lead flow.</span>',
+        exp4Achievement3: '<span class="text-desktop">Received basic training in <strong>PHP</strong>.</span><span class="text-mobile">Introduced to PHP foundations.</span>',
+        exp5Title: 'B.S. in Computer Engineering',
+        exp5Company: 'University of La Rioja',
+        exp5DescDesktop: 'Completed the degree in Computer Engineering, building a strong foundation in software systems, programming, and data management.',
+        exp5DescMobile: 'B.S. Computer Engineering: solid base in software, programming and data.',
         // Contact section
         getInTouchTitle: 'Get In Touch',
         contactSubtitleDesktop: 'Let\'s Work Together<br>Ready to bring your ideas to life? I\'m here to help you build something amazing.',
@@ -530,6 +664,30 @@ const updateHTMLTexts = () => {
         whatIBringTitle.textContent = t.whatIBring;
     }
     
+    // Traducir lista "What I Bring"
+    const aboutListItems = document.querySelectorAll('.about__list li');
+    if (aboutListItems.length >= 6) {
+        aboutListItems.forEach((li, index) => {
+            const icon = li.querySelector('i');
+            let newText = '';
+            if (index === 0) newText = t.pythonMastery;
+            else if (index === 1) newText = t.cloudMigration;
+            else if (index === 2) newText = t.aiIntegration;
+            else if (index === 3) newText = t.geoAnalysis;
+            else if (index === 4) newText = t.backendDev;
+            else if (index === 5) newText = t.bigDataTech;
+            if (newText && icon) {
+                li.innerHTML = `<i class='bx bx-check'></i> ${newText}`;
+            }
+        });
+    }
+    
+    // Traducir "Skills & Technologies"
+    const skillsTitle = document.querySelector('.about__skills .about__section-title');
+    if (skillsTitle && skillsTitle.textContent.includes('Skills')) {
+        skillsTitle.textContent = t.skillsTechnologies;
+    }
+    
     const stats = document.querySelectorAll('.stat-item span');
     if (stats.length >= 3) {
         if (stats[0].textContent.includes('Years')) stats[0].innerHTML = t.yearsExperience;
@@ -547,6 +705,40 @@ const updateHTMLTexts = () => {
     const projectsSubtitleMobile = document.querySelector('#projects .section__subtitle .text-mobile');
     if (projectsSubtitleMobile) projectsSubtitleMobile.textContent = t.projectsSubtitleMobile;
     
+    // Traducir proyectos
+    const projectCards = document.querySelectorAll('.project-card');
+    projectCards.forEach((card, index) => {
+        const title = card.querySelector('.project-title');
+        const descDesktop = card.querySelector('.project-description .text-desktop');
+        const descMobile = card.querySelector('.project-description .text-mobile');
+        
+        if (index === 0 && title && title.textContent.includes('GIS-Powered')) {
+            if (title) title.textContent = t.project1Title;
+            if (descDesktop) descDesktop.innerHTML = t.project1DescDesktop;
+            if (descMobile) descMobile.textContent = t.project1DescMobile;
+        } else if (index === 1 && title && title.textContent.includes('AI Chatbot')) {
+            if (title) title.textContent = t.project2Title;
+            if (descDesktop) descDesktop.innerHTML = t.project2DescDesktop;
+            if (descMobile) descMobile.textContent = t.project2DescMobile;
+        } else if (index === 2 && title && title.textContent.includes('Remote Sensing')) {
+            if (title) title.textContent = t.project3Title;
+            if (descDesktop) descDesktop.innerHTML = t.project3DescDesktop;
+            if (descMobile) descMobile.textContent = t.project3DescMobile;
+        } else if (index === 3 && title && title.textContent.includes('Nematool')) {
+            if (title) title.textContent = t.project4Title;
+            if (descDesktop) descDesktop.innerHTML = t.project4DescDesktop;
+            if (descMobile) descMobile.textContent = t.project4DescMobile;
+        } else if (index === 4 && title && title.textContent.includes('Keylines')) {
+            if (title) title.textContent = t.project5Title;
+            if (descDesktop) descDesktop.innerHTML = t.project5DescDesktop;
+            if (descMobile) descMobile.textContent = t.project5DescMobile;
+        } else if (index === 5 && title && title.textContent.includes('SCADA')) {
+            if (title) title.textContent = t.project6Title;
+            if (descDesktop) descDesktop.innerHTML = t.project6DescDesktop;
+            if (descMobile) descMobile.textContent = t.project6DescMobile;
+        }
+    });
+    
     // Experience section
     const experienceTitle = document.querySelector('#experience .section__title');
     if (experienceTitle) experienceTitle.textContent = t.careerJourney;
@@ -557,16 +749,97 @@ const updateHTMLTexts = () => {
     const experienceSubtitleMobile = document.querySelector('#experience .section__subtitle .text-mobile');
     if (experienceSubtitleMobile) experienceSubtitleMobile.textContent = t.experienceSubtitleMobile;
     
-    // Actualizar textos "Full-time" y "Education"
-    const fullTimeTexts = document.querySelectorAll('.timeline-meta span');
-    fullTimeTexts.forEach(span => {
-        if (span.textContent.includes('Full-time')) {
-            const icon = span.querySelector('i');
-            span.innerHTML = icon ? `<i class='bx bx-briefcase'></i> ${t.fullTime}` : t.fullTime;
+    // Traducir experiencia profesional
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    timelineItems.forEach((item, index) => {
+        const title = item.querySelector('.timeline-title');
+        const descDesktop = item.querySelector('.timeline-description .text-desktop');
+        const descMobile = item.querySelector('.timeline-description .text-mobile');
+        const achievements = item.querySelectorAll('.timeline-achievements li');
+        const locationSpans = item.querySelectorAll('.timeline-meta span');
+        
+        // Actualizar "Spain" y "Full-time"/"Education"
+        locationSpans.forEach(span => {
+            if (span.textContent.includes('Spain') && !span.textContent.includes('Logroño')) {
+                const icon = span.querySelector('i');
+                span.innerHTML = icon ? `<i class='bx bx-map'></i> ${t.spain}` : t.spain;
+            }
+            if (span.textContent.includes('Full-time')) {
+                const icon = span.querySelector('i');
+                span.innerHTML = icon ? `<i class='bx bx-briefcase'></i> ${t.fullTime}` : t.fullTime;
+            }
+            if (span.textContent.includes('Education')) {
+                const icon = span.querySelector('i');
+                span.innerHTML = icon ? `<i class='bx bx-briefcase'></i> ${t.education}` : t.education;
+            }
+            if (span.textContent.includes('Present')) {
+                span.innerHTML = span.innerHTML.replace('Present', t.present);
+            }
+        });
+        
+        // Experiencia 1: Ager Technology
+        if (index === 0) {
+            if (title && title.textContent.includes('Software & Data')) {
+                title.textContent = t.exp1Title;
+            }
+            if (descDesktop) descDesktop.textContent = t.exp1DescDesktop;
+            if (descMobile) descMobile.textContent = t.exp1DescMobile;
+            achievements.forEach((achievement, achIndex) => {
+                if (achIndex < 8) {
+                    const key = `exp1Achievement${achIndex + 1}`;
+                    if (t[key]) achievement.innerHTML = t[key];
+                }
+            });
         }
-        if (span.textContent.includes('Education')) {
-            const icon = span.querySelector('i');
-            span.innerHTML = icon ? `<i class='bx bx-briefcase'></i> ${t.education}` : t.education;
+        // Experiencia 2: Bosonit
+        else if (index === 1) {
+            if (title && title.textContent.includes('Full-Stack')) {
+                title.textContent = t.exp2Title;
+            }
+            if (descDesktop) descDesktop.textContent = t.exp2DescDesktop;
+            if (descMobile) descMobile.textContent = t.exp2DescMobile;
+            achievements.forEach((achievement, achIndex) => {
+                if (achIndex < 3) {
+                    const key = `exp2Achievement${achIndex + 1}`;
+                    if (t[key]) achievement.innerHTML = t[key];
+                }
+            });
+        }
+        // Experiencia 3: Standard Profil
+        else if (index === 2) {
+            if (title && title.textContent.includes('SCADA')) {
+                title.textContent = t.exp3Title;
+            }
+            if (descDesktop) descDesktop.textContent = t.exp3DescDesktop;
+            if (descMobile) descMobile.textContent = t.exp3DescMobile;
+            achievements.forEach((achievement, achIndex) => {
+                if (achIndex < 3) {
+                    const key = `exp3Achievement${achIndex + 1}`;
+                    if (t[key]) achievement.innerHTML = t[key];
+                }
+            });
+        }
+        // Experiencia 4: SDi Digital Group
+        else if (index === 3) {
+            if (title && title.textContent.includes('Front-End')) {
+                title.textContent = t.exp4Title;
+            }
+            if (descDesktop) descDesktop.textContent = t.exp4DescDesktop;
+            if (descMobile) descMobile.textContent = t.exp4DescMobile;
+            achievements.forEach((achievement, achIndex) => {
+                if (achIndex < 3) {
+                    const key = `exp4Achievement${achIndex + 1}`;
+                    if (t[key]) achievement.innerHTML = t[key];
+                }
+            });
+        }
+        // Experiencia 5: Universidad
+        else if (index === 4) {
+            if (title && title.textContent.includes('B.S.')) {
+                title.textContent = t.exp5Title;
+            }
+            if (descDesktop) descDesktop.textContent = t.exp5DescDesktop;
+            if (descMobile) descMobile.textContent = t.exp5DescMobile;
         }
     });
     
