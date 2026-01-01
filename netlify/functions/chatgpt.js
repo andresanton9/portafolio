@@ -1,5 +1,3 @@
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
 const API_BASE = "https://api.openai.com/v1";
 const fetchWithFallback = (...args) => {
   if (typeof globalThis.fetch === "function") {
@@ -130,81 +128,55 @@ const sendUserMessage = async (conversationId, prompt) => {
   }
 };
 
-const generateResponse = async (conversationId) => {
-  const response = await openaiFetch("/responses", {
-    method: "POST",
-    body: JSON.stringify({
-      model: "gpt-5-nano-2025-08-07",
-      conversation_id: conversationId,
-    }),
-  });
-
-  let finalResponse = response;
-  const maxRetries = 10;
-  let attempt = 0;
-  let delay = 1000;
-
-  // Si la respuesta tiene un status, esperar hasta que esté completada
-  while (
-    finalResponse.status &&
-    (finalResponse.status === "queued" || finalResponse.status === "in_progress") &&
-    attempt < maxRetries
-  ) {
-    await sleep(delay);
-    attempt += 1;
-    delay = Math.min(5000, delay * 1.8);
-    if (finalResponse.id) {
-      finalResponse = await openaiFetch(`/responses/${finalResponse.id}`);
-    } else {
-      break;
-    }
+const getConversationItemsAsInput = async (conversationId) => {
+  try {
+    const itemsResponse = await openaiFetch(`/conversations/${conversationId}/items?limit=100&order=asc`);
+    const items = itemsResponse.data || [];
+    
+    // Convertir items de conversación al formato input del Responses API
+    const input = items
+      .filter((item) => item.type === "message" && (item.role === "user" || item.role === "assistant"))
+      .map((item) => {
+        const content = Array.isArray(item.content) 
+          ? item.content.map((block) => {
+              if (block.type === "input_text" || block.type === "output_text") {
+                return block.text || "";
+              }
+              return "";
+            }).filter(Boolean).join("")
+          : "";
+        
+        return {
+          role: item.role,
+          content: content,
+        };
+      })
+      .filter((msg) => msg.content); // Filtrar mensajes vacíos
+    
+    return input;
+  } catch (error) {
+    console.error("Error obteniendo items de conversación:", error);
+    return [];
   }
-
-  return finalResponse;
-};
-
-const extractTextFromItem = (item) => {
-  if (!item || !Array.isArray(item.content)) {
-    return "";
-  }
-
-  const chunks = [];
-
-  for (const block of item.content) {
-    if (block.type === "output_text") {
-      if (typeof block.text === "string") {
-        chunks.push(block.text);
-      } else if (block.text?.value) {
-        chunks.push(block.text.value);
-      } else if (block.text) {
-        chunks.push(String(block.text));
-      }
-    } else if (block.type === "input_text" && block.text) {
-      // Para mensajes de usuario (no debería usarse aquí, pero por seguridad)
-      chunks.push(typeof block.text === "string" ? block.text : String(block.text));
-    }
-  }
-
-  return chunks.join("\n").trim();
-};
-
-const fetchAssistantReply = async (conversationId) => {
-  const itemsResponse = await openaiFetch(`/conversations/${conversationId}/items?limit=20&order=desc`);
-  const items = itemsResponse.data || [];
-  
-  // Buscar el último mensaje del asistente
-  const assistantItems = items.filter((item) => item.role === "assistant" && item.type === "message");
-
-  if (!assistantItems.length) {
-    return "";
-  }
-
-  const lastItem = assistantItems[0]; // Ya están ordenados desc
-  return extractTextFromItem(lastItem);
 };
 
 const openaiStreamResponse = async (conversationId) => {
   ensureEnv();
+  const model = "gpt-5-nano-2025-08-07";
+
+  // Obtener todos los mensajes de la conversación para pasarlos como input
+  const input = await getConversationItemsAsInput(conversationId);
+
+  const requestBody = {
+    model: model,
+    input: input,
+    stream: true,
+  };
+
+  // Agregar conversation_id si está disponible para mantener el contexto
+  if (conversationId) {
+    requestBody.conversation_id = conversationId;
+  }
 
   const response = await fetchWithFallback(`${API_BASE}/responses`, {
     method: "POST",
@@ -213,11 +185,7 @@ const openaiStreamResponse = async (conversationId) => {
       "Content-Type": "application/json",
       Accept: "text/event-stream",
     },
-    body: JSON.stringify({
-      model: "gpt-5-nano-2025-08-07",
-      conversation_id: conversationId,
-      stream: true,
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok || !response.body) {
@@ -232,8 +200,7 @@ const openaiStreamResponse = async (conversationId) => {
 
 exports.handler = async (event) => {
   try {
-    const { prompt, threadId, stream } = JSON.parse(event.body ?? "{}");
-    const shouldStream = stream === true || stream === "true";
+    const { prompt, threadId } = JSON.parse(event.body ?? "{}");
 
     // Mantener compatibilidad con threadId pero usar conversationId internamente
     const conversationId = threadId;
@@ -246,82 +213,54 @@ exports.handler = async (event) => {
       };
     }
 
-    if (shouldStream) {
-      const streamResponse = new ReadableStream({
-        start: async (controller) => {
-          const encoder = new TextEncoder();
-          try {
-            let currentConversationId = await createConversationIfNeeded(conversationId);
-            currentConversationId = await sendUserMessage(currentConversationId, prompt);
+    // Siempre usar streaming
+    const streamResponse = new ReadableStream({
+      start: async (controller) => {
+        const encoder = new TextEncoder();
+        try {
+          let currentConversationId = await createConversationIfNeeded(conversationId);
+          currentConversationId = await sendUserMessage(currentConversationId, prompt);
 
-            controller.enqueue(
-              encoder.encode(
-                `event: conversation\n` +
-                  `data: ${JSON.stringify({ threadId: currentConversationId, conversationId: currentConversationId })}\n\n`
-              )
-            );
+          controller.enqueue(
+            encoder.encode(
+              `event: conversation\n` +
+                `data: ${JSON.stringify({ threadId: currentConversationId, conversationId: currentConversationId })}\n\n`
+            )
+          );
 
-            const bodyStream = await openaiStreamResponse(currentConversationId);
-            const reader = bodyStream.getReader();
+          const bodyStream = await openaiStreamResponse(currentConversationId);
+          const reader = bodyStream.getReader();
 
-            while (true) {
-              const { value, done } = await reader.read();
-              if (done) break;
-              if (value) {
-                controller.enqueue(value);
-              }
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            if (value) {
+              controller.enqueue(value);
             }
-
-            controller.close();
-          } catch (err) {
-            controller.enqueue(
-              new TextEncoder().encode(
-                `event: error\n` +
-                  `data: ${JSON.stringify({ message: err.message })}\n\n`
-              )
-            );
-            controller.close();
           }
-        },
-      });
 
-      return new Response(streamResponse, {
-        status: 200,
-        headers: {
-          "Content-Type": "text/event-stream; charset=utf-8",
-          "Cache-Control": "no-cache, no-transform",
-          Connection: "keep-alive",
-          "Access-Control-Allow-Origin": "*",
-        },
-      });
-    }
+          controller.close();
+        } catch (err) {
+          controller.enqueue(
+            new TextEncoder().encode(
+              `event: error\n` +
+                `data: ${JSON.stringify({ message: err.message })}\n\n`
+            )
+          );
+          controller.close();
+        }
+      },
+    });
 
-    let currentConversationId = await createConversationIfNeeded(conversationId);
-    currentConversationId = await sendUserMessage(currentConversationId, prompt);
-    const finalResponse = await generateResponse(currentConversationId);
-
-    // Si hay un error en el estado de la respuesta
-    if (finalResponse.status && finalResponse.status !== "completed") {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({
-          error: `Respuesta terminada con estado inesperado: ${finalResponse.status}`,
-        }),
-        headers: { "Content-Type": "application/json" },
-      };
-    }
-
-    const textReply = await fetchAssistantReply(currentConversationId);
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ 
-        reply: textReply, 
-        threadId: currentConversationId,
-        conversationId: currentConversationId 
-      }),
-      headers: { "Content-Type": "application/json" },
-    };
+    return new Response(streamResponse, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/event-stream; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
   } catch (error) {
     console.error("Error handler:", error);
     return {
