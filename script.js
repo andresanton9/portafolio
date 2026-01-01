@@ -199,6 +199,492 @@ if (typeof updateContactAos === 'function') {
     updateContactAos(true);
 }
 
+/*=============== LANGUAGE DETECTION ===============*/
+const detectLanguage = () => {
+    // Intentar obtener el idioma del navegador
+    const browserLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    
+    // Verificar si el idioma es español (es, es-ES, es-MX, etc.)
+    if (browserLang.startsWith('es')) {
+        return 'es';
+    }
+    
+    // Por defecto, usar inglés
+    return 'en';
+};
+
+const currentLang = detectLanguage();
+
+const translations = {
+    es: {
+        // Chatbot
+        initialMessage: '¡Hola! Soy tu asistente virtual. Pregúntame sobre mi experiencia, proyectos o cualquier detalle que quieras conocer sobre mí.',
+        thinking: 'Déjame pensar...',
+        errorMessage: 'Lo siento, no pude obtener una respuesta. Inténtalo de nuevo más tarde.',
+        placeholder: 'Escribe tu pregunta...',
+        assistantTitle: 'Mi asistente virtual',
+        hintText: '¿Prefieres preguntar directamente?<br><strong>¡Háblame aquí!</strong>',
+        toggleAriaLabel: 'Abrir asistente virtual',
+        closeAriaLabel: 'Cerrar asistente',
+        micAriaLabel: 'Dictar mensaje de voz',
+        sendAriaLabel: 'Enviar mensaje',
+        voiceNotSupported: 'La entrada de voz no está soportada en este navegador',
+        // Navigation
+        navHome: 'Inicio',
+        navAbout: 'Sobre mí',
+        navProjects: 'Proyectos',
+        navExperience: 'Experiencia',
+        navContact: 'Contacto',
+        // Home section
+        mobileWarning: 'Nota: Versión móvil reducida. En escritorio verás el portafolio completo.',
+        availableForOpportunities: 'Disponible para oportunidades',
+        homeSubtitleDesktop: 'Construyendo Sistemas Inteligentes y Soluciones Geoespaciales.',
+        homeSubtitleMobile: 'Construyendo software inteligente y soluciones GIS.',
+        homeDescriptionDesktop: 'Ingeniero de Software y Datos especializado en desarrollo backend en Python, migración a la nube (AWS), integración de IA y Sistemas de Información Geográfica (GIS). Transformo datos complejos en productos digitales accionables.',
+        homeDescriptionMobile: 'Especialista en backend Python, AWS, IA y GIS creando impacto digital.',
+        viewMyWork: 'Ver mi trabajo',
+        getInTouch: 'Contáctame',
+        connectWithMe: 'Conéctate conmigo',
+        // About section
+        aboutMe: 'Sobre mí',
+        aboutSubtitleDesktop: 'Ingeniería, Datos y Automatización<br>Conectando código, geo-datos e inteligencia artificial',
+        aboutSubtitleMobile: 'Ingeniería + datos + IA conectando código con conocimiento geoespacial.',
+        myJourney: 'Mi trayectoria',
+        journeyText1Desktop: 'Soy Ingeniero de Software con una sólida formación en Ciencias de la Computación, enfocado en el ciclo completo de desarrollo de software, desde la reingeniería de sistemas legados hasta la migración a la nube e implementación de soluciones avanzadas de IA.',
+        journeyText1Mobile: 'Ingeniero de software de ciclo completo entregando transformaciones lideradas por la nube y la IA.',
+        journeyText2Desktop: 'Mi especialización principal está en el <strong>desarrollo backend en Python</strong>, donde aprovecho su poder para automatización, procesamiento de datos y creación de APIs altamente eficientes. Tengo experiencia práctica migrando sistemas a <strong>AWS</strong> y desarrollando <strong>chatbots con IA</strong> listos para producción.',
+        journeyText2Mobile: 'Líder en backend Python: automatización, migraciones AWS y chatbots con IA listos para producción.',
+        journeyText3Desktop: 'Una habilidad diferenciadora clave es mi experiencia en <strong>Sistemas de Información Geográfica (GIS)</strong> usando herramientas como <strong>QGIS y ArcGIS Online</strong> para procesar datos espaciales, ofreciendo insights valiosos para clientes en áreas como predicción agrícola.',
+        journeyText3Mobile: 'Diferenciador: análisis GIS avanzado con QGIS y ArcGIS para impulsar insights espaciales.',
+        whatIBring: 'Lo que aporto',
+        // Projects section
+        featuredWork: 'Trabajos destacados',
+        projectsSubtitleDesktop: 'Proyectos y casos de estudio<br>Una muestra de mi trabajo reciente, desde el concepto hasta el despliegue',
+        projectsSubtitleMobile: 'Proyectos seleccionados destacando estrategia hasta despliegue.',
+        // Experience section
+        careerJourney: 'Trayectoria profesional',
+        experienceSubtitleDesktop: 'Experiencia profesional<br>Una línea de tiempo de mi crecimiento y contribuciones en la industria tecnológica',
+        experienceSubtitleMobile: 'Hitos clave que dan forma a mi trayectoria tecnológica.',
+        fullTime: 'Tiempo completo',
+        education: 'Educación',
+        // Contact section
+        getInTouchTitle: 'Contáctame',
+        contactSubtitleDesktop: 'Trabajemos juntos<br>¿Listo para dar vida a tus ideas? Estoy aquí para ayudarte a construir algo increíble.',
+        contactSubtitleMobile: 'Comparte tu visión y lo construiremos juntos.',
+        contactInformation: 'Información de contacto',
+        email: 'Correo electrónico',
+        sendEmailAnytime: 'Envíame un correo en cualquier momento',
+        phone: 'Teléfono',
+        availableForCalls: 'Disponible para llamadas',
+        location: 'Ubicación',
+        openToRemote: 'Abierto a oportunidades remotas',
+        followMe: 'Sígueme',
+        availableForWork: 'Disponible para trabajar',
+        availableTextDesktop: 'Actualmente estoy aceptando nuevos proyectos y me encantaría conocer el tuyo.',
+        availableTextMobile: 'Actualmente abierto a nuevas colaboraciones.',
+        sendMessage: 'Envíame un mensaje',
+        fullName: 'Nombre completo',
+        emailAddress: 'Dirección de correo',
+        subject: 'Asunto',
+        message: 'Mensaje',
+        sendMessageButton: 'Enviar mensaje',
+        usuallyResponds: 'Generalmente responde en 24 horas',
+        freeConsultation: 'Consulta gratuita disponible',
+        // Footer
+        expertise: 'Especialización',
+        backendDevelopment: 'Desarrollo Backend',
+        cloudMigration: 'Migración a la nube (AWS)',
+        aiAutomation: 'IA y Automatización',
+        gisSolutions: 'Soluciones GIS',
+        footerDescriptionDesktop: 'Ingeniero de Software y Datos especializado en Python, AWS, IA y GIS. Apasionado por construir sistemas inteligentes.',
+        footerDescriptionMobile: 'Ingeniero de software y datos creando plataformas inteligentes.',
+        // Stats
+        yearsExperience: 'Años<br>Experiencia',
+        complexProjects: 'Proyectos<br>Complejos',
+        automatedProcesses: 'Procesos<br>Automatizados'
+    },
+    en: {
+        // Chatbot
+        initialMessage: 'Hello! I am your virtual assistant. Ask me about my experience, projects or any detail you want to know about me.',
+        thinking: 'Let me think...',
+        errorMessage: 'Sorry, I couldn\'t get a response. Try again later.',
+        placeholder: 'Write your question...',
+        assistantTitle: 'My virtual assistant',
+        hintText: 'Prefer to ask directly?<br><strong>Talk to me here!</strong>',
+        toggleAriaLabel: 'Open virtual assistant',
+        closeAriaLabel: 'Close assistant',
+        micAriaLabel: 'Dictate voice message',
+        sendAriaLabel: 'Send message',
+        voiceNotSupported: 'Voice input is not supported by this browser',
+        // Navigation
+        navHome: 'Home',
+        navAbout: 'About',
+        navProjects: 'Projects',
+        navExperience: 'Experience',
+        navContact: 'Contact',
+        // Home section
+        mobileWarning: 'Note: Mobile version reduced. On desktop you will see the full portfolio.',
+        availableForOpportunities: 'Available for opportunities',
+        homeSubtitleDesktop: 'Building Intelligent Systems and Geo-Spatial Solutions.',
+        homeSubtitleMobile: 'Building intelligent software & GIS solutions.',
+        homeDescriptionDesktop: 'Software and Data Engineer specializing in Python backend development, cloud migration (AWS), AI integration, and Geographic Information Systems (GIS). I transform complex data into actionable digital products.',
+        homeDescriptionMobile: 'Python backend, AWS, AI and GIS specialist crafting digital impact.',
+        viewMyWork: 'View My Work',
+        getInTouch: 'Get In Touch',
+        connectWithMe: 'Connect with me:',
+        // About section
+        aboutMe: 'About Me',
+        aboutSubtitleDesktop: 'Engineering, Data, and Automation<br>Bridging the gap between code, geo-data, and artificial intelligence',
+        aboutSubtitleMobile: 'Engineering + data + AI bridging code with geospatial insight.',
+        myJourney: 'My Journey',
+        journeyText1Desktop: 'I am a Software Engineer with a strong background in Computer Science, focused on the complete software development lifecycle, from re-engineering legacy systems to cloud migration and implementing advanced AI solutions.',
+        journeyText1Mobile: 'Full-cycle software engineer delivering cloud and AI-led transformations.',
+        journeyText2Desktop: 'My core specialization lies in <strong>Python backend development</strong>, where I leverage its power for automation, data processing, and creating highly efficient APIs. I have hands-on experience migrating systems to <strong>AWS</strong> and developing production-ready <strong>AI-powered chatbots</strong>.',
+        journeyText2Mobile: 'Python backend lead: automation, AWS migrations and production-ready AI chatbots.',
+        journeyText3Desktop: 'A key differentiating skill is my expertise in <strong>Geographic Information Systems (GIS)</strong> using tools like <strong>QGIS and ArcGIS Online</strong> to process spatial data, offering valuable insights for clients in areas like agricultural prediction.',
+        journeyText3Mobile: 'Differentiator: advanced GIS analytics with QGIS & ArcGIS to drive spatial insights.',
+        whatIBring: 'What I Bring',
+        // Projects section
+        featuredWork: 'Featured Work',
+        projectsSubtitleDesktop: 'Projects & Case Studies<br>A showcase of my recent work, from concept to deployment',
+        projectsSubtitleMobile: 'Selected projects highlighting strategy to deployment.',
+        // Experience section
+        careerJourney: 'Career Journey',
+        experienceSubtitleDesktop: 'Professional Experience<br>A timeline of my growth and contributions in the tech industry',
+        experienceSubtitleMobile: 'Key milestones shaping my tech journey.',
+        fullTime: 'Full-time',
+        education: 'Education',
+        // Contact section
+        getInTouchTitle: 'Get In Touch',
+        contactSubtitleDesktop: 'Let\'s Work Together<br>Ready to bring your ideas to life? I\'m here to help you build something amazing.',
+        contactSubtitleMobile: 'Share your vision and we\'ll build it together.',
+        contactInformation: 'Contact Information',
+        email: 'Email',
+        sendEmailAnytime: 'Send me an email anytime',
+        phone: 'Phone',
+        availableForCalls: 'Available for calls',
+        location: 'Location',
+        openToRemote: 'Open to remote opportunities',
+        followMe: 'Follow Me',
+        availableForWork: 'Available for work',
+        availableTextDesktop: 'I\'m currently accepting new projects and would love to hear about yours.',
+        availableTextMobile: 'Currently open to new collaborations.',
+        sendMessage: 'Send me a message',
+        fullName: 'Full Name *',
+        emailAddress: 'Email Address *',
+        subject: 'Subject',
+        message: 'Message *',
+        sendMessageButton: 'Send Message',
+        usuallyResponds: 'Usually responds within 24 hours',
+        freeConsultation: 'Free consultation available',
+        // Footer
+        expertise: 'Expertise',
+        backendDevelopment: 'Backend Development',
+        cloudMigration: 'Cloud Migration (AWS)',
+        aiAutomation: 'AI & Automation',
+        gisSolutions: 'GIS Solutions',
+        footerDescriptionDesktop: 'Software and Data Engineer specializing in Python, AWS, AI, and GIS. Passionate about building intelligent systems.',
+        footerDescriptionMobile: 'Software & data engineer crafting intelligent platforms.',
+        // Stats
+        yearsExperience: 'Years<br>Experience',
+        complexProjects: 'Complex<br>Projects',
+        automatedProcesses: 'Automated<br>Processes'
+    }
+};
+
+const t = translations[currentLang];
+
+/*=============== UPDATE CHATBOT UI TEXT ===============*/
+const updateChatbotTexts = () => {
+    // Actualizar placeholder del input
+    const chatbotInput = document.getElementById('chatbot-input');
+    if (chatbotInput) {
+        chatbotInput.placeholder = t.placeholder;
+    }
+
+    // Actualizar título del asistente
+    const assistantTitle = document.querySelector('#chatbot-panel header h3');
+    if (assistantTitle) {
+        assistantTitle.textContent = t.assistantTitle;
+    }
+
+    // Actualizar hint text
+    const chatbotHint = document.getElementById('chatbot-hint');
+    if (chatbotHint) {
+        const hintText = chatbotHint.querySelector('.chatbot__hint-text');
+        if (hintText) {
+            hintText.innerHTML = t.hintText;
+        }
+    }
+
+    // Actualizar aria-labels
+    const chatbotToggle = document.getElementById('chatbot-toggle');
+    if (chatbotToggle) {
+        chatbotToggle.setAttribute('aria-label', t.toggleAriaLabel);
+    }
+
+    const chatbotClose = document.getElementById('chatbot-close');
+    if (chatbotClose) {
+        chatbotClose.setAttribute('aria-label', t.closeAriaLabel);
+    }
+
+    const chatbotMic = document.getElementById('chatbot-mic');
+    if (chatbotMic) {
+        chatbotMic.setAttribute('aria-label', t.micAriaLabel);
+    }
+
+    const chatbotSend = document.querySelector('.chatbot__send');
+    if (chatbotSend) {
+        chatbotSend.setAttribute('aria-label', t.sendAriaLabel);
+    }
+};
+
+/*=============== UPDATE HTML TEXTS ===============*/
+const updateHTMLTexts = () => {
+    const t = translations[currentLang];
+    
+    // Actualizar atributo lang del HTML
+    document.documentElement.lang = currentLang;
+    
+    // Navegación
+    const navLinks = document.querySelectorAll('.nav__link');
+    navLinks.forEach(link => {
+        const text = link.textContent.trim();
+        if (text.includes('Home')) link.innerHTML = `<i class='bx bxs-home'></i> ${t.navHome}`;
+        else if (text.includes('About')) link.innerHTML = `<i class='bx bxs-user'></i> ${t.navAbout}`;
+        else if (text.includes('Projects')) link.innerHTML = `<i class='bx bxs-briefcase-alt-2'></i> ${t.navProjects}`;
+        else if (text.includes('Experience')) link.innerHTML = `<i class='bx bxs-graduation'></i> ${t.navExperience}`;
+        else if (text.includes('Contact')) link.innerHTML = `<i class='bx bxs-contact'></i> ${t.navContact}`;
+    });
+    
+    // Home section
+    const mobileWarning = document.querySelector('.home__mobile-warning .text-mobile');
+    if (mobileWarning) {
+        const icon = mobileWarning.querySelector('i');
+        mobileWarning.innerHTML = icon ? `<i class='bx bx-mobile-alt'></i> ${t.mobileWarning}` : t.mobileWarning;
+    }
+    
+    const homeBadge = document.querySelector('.home__badge');
+    if (homeBadge) {
+        const icon = homeBadge.querySelector('i');
+        homeBadge.innerHTML = icon ? `<i class='bx bx-briefcase-alt'></i> ${t.availableForOpportunities}` : t.availableForOpportunities;
+    }
+    
+    const homeSubtitleDesktop = document.querySelector('.home__subtitle .text-desktop');
+    if (homeSubtitleDesktop) homeSubtitleDesktop.textContent = t.homeSubtitleDesktop;
+    
+    const homeSubtitleMobile = document.querySelector('.home__subtitle .text-mobile');
+    if (homeSubtitleMobile) homeSubtitleMobile.textContent = t.homeSubtitleMobile;
+    
+    const homeDescDesktop = document.querySelector('.home__description .text-desktop');
+    if (homeDescDesktop) homeDescDesktop.textContent = t.homeDescriptionDesktop;
+    
+    const homeDescMobile = document.querySelector('.home__description .text-mobile');
+    if (homeDescMobile) homeDescMobile.textContent = t.homeDescriptionMobile;
+    
+    const viewWorkBtn = document.querySelector('.home__buttons .btn--primary');
+    if (viewWorkBtn) {
+        const icon = viewWorkBtn.querySelector('i');
+        viewWorkBtn.innerHTML = icon ? `${t.viewMyWork} <i class='bx bx-right-arrow-alt'></i>` : t.viewMyWork;
+    }
+    
+    const getInTouchBtn = document.querySelector('.home__buttons .btn--secondary');
+    if (getInTouchBtn) getInTouchBtn.textContent = t.getInTouch;
+    
+    const connectText = document.querySelector('.home__social span');
+    if (connectText) connectText.textContent = t.connectWithMe;
+    
+    // About section
+    const aboutTitle = document.querySelector('#about .section__title');
+    if (aboutTitle) aboutTitle.textContent = t.aboutMe;
+    
+    const aboutSubtitleDesktop = document.querySelector('#about .section__subtitle .text-desktop');
+    if (aboutSubtitleDesktop) aboutSubtitleDesktop.innerHTML = t.aboutSubtitleDesktop;
+    
+    const aboutSubtitleMobile = document.querySelector('#about .section__subtitle .text-mobile');
+    if (aboutSubtitleMobile) aboutSubtitleMobile.textContent = t.aboutSubtitleMobile;
+    
+    const myJourneyTitle = document.querySelector('.about__section-title');
+    if (myJourneyTitle && myJourneyTitle.textContent.includes('Journey')) {
+        myJourneyTitle.textContent = t.myJourney;
+    }
+    
+    const journeyTexts = document.querySelectorAll('.about__content p');
+    journeyTexts.forEach((p, index) => {
+        const desktop = p.querySelector('.text-desktop');
+        const mobile = p.querySelector('.text-mobile');
+        if (index === 0) {
+            if (desktop) desktop.textContent = t.journeyText1Desktop;
+            if (mobile) mobile.textContent = t.journeyText1Mobile;
+        } else if (index === 1) {
+            if (desktop) desktop.innerHTML = t.journeyText2Desktop;
+            if (mobile) mobile.textContent = t.journeyText2Mobile;
+        } else if (index === 2) {
+            if (desktop) desktop.innerHTML = t.journeyText3Desktop;
+            if (mobile) mobile.textContent = t.journeyText3Mobile;
+        }
+    });
+    
+    const whatIBringTitle = document.querySelectorAll('.about__section-title')[1];
+    if (whatIBringTitle && whatIBringTitle.textContent.includes('Bring')) {
+        whatIBringTitle.textContent = t.whatIBring;
+    }
+    
+    const stats = document.querySelectorAll('.stat-item span');
+    if (stats.length >= 3) {
+        if (stats[0].textContent.includes('Years')) stats[0].innerHTML = t.yearsExperience;
+        if (stats[1].textContent.includes('Complex')) stats[1].innerHTML = t.complexProjects;
+        if (stats[2].textContent.includes('Automated')) stats[2].innerHTML = t.automatedProcesses;
+    }
+    
+    // Projects section
+    const projectsTitle = document.querySelector('#projects .section__title');
+    if (projectsTitle) projectsTitle.textContent = t.featuredWork;
+    
+    const projectsSubtitleDesktop = document.querySelector('#projects .section__subtitle .text-desktop');
+    if (projectsSubtitleDesktop) projectsSubtitleDesktop.innerHTML = t.projectsSubtitleDesktop;
+    
+    const projectsSubtitleMobile = document.querySelector('#projects .section__subtitle .text-mobile');
+    if (projectsSubtitleMobile) projectsSubtitleMobile.textContent = t.projectsSubtitleMobile;
+    
+    // Experience section
+    const experienceTitle = document.querySelector('#experience .section__title');
+    if (experienceTitle) experienceTitle.textContent = t.careerJourney;
+    
+    const experienceSubtitleDesktop = document.querySelector('#experience .section__subtitle .text-desktop');
+    if (experienceSubtitleDesktop) experienceSubtitleDesktop.innerHTML = t.experienceSubtitleDesktop;
+    
+    const experienceSubtitleMobile = document.querySelector('#experience .section__subtitle .text-mobile');
+    if (experienceSubtitleMobile) experienceSubtitleMobile.textContent = t.experienceSubtitleMobile;
+    
+    // Actualizar textos "Full-time" y "Education"
+    const fullTimeTexts = document.querySelectorAll('.timeline-meta span');
+    fullTimeTexts.forEach(span => {
+        if (span.textContent.includes('Full-time')) {
+            const icon = span.querySelector('i');
+            span.innerHTML = icon ? `<i class='bx bx-briefcase'></i> ${t.fullTime}` : t.fullTime;
+        }
+        if (span.textContent.includes('Education')) {
+            const icon = span.querySelector('i');
+            span.innerHTML = icon ? `<i class='bx bx-briefcase'></i> ${t.education}` : t.education;
+        }
+    });
+    
+    // Contact section
+    const contactTitle = document.querySelector('#contact .section__title');
+    if (contactTitle) contactTitle.textContent = t.getInTouchTitle;
+    
+    const contactSubtitleDesktop = document.querySelector('#contact .section__subtitle .text-desktop');
+    if (contactSubtitleDesktop) contactSubtitleDesktop.innerHTML = t.contactSubtitleDesktop;
+    
+    const contactSubtitleMobile = document.querySelector('#contact .section__subtitle .text-mobile');
+    if (contactSubtitleMobile) contactSubtitleMobile.textContent = t.contactSubtitleMobile;
+    
+    const contactInfoTitle = document.querySelector('.contact__info-title');
+    if (contactInfoTitle && contactInfoTitle.textContent.includes('Contact Information')) {
+        contactInfoTitle.textContent = t.contactInformation;
+    }
+    
+    const emailLabel = document.querySelector('.contact__item h4');
+    if (emailLabel && emailLabel.textContent === 'Email') {
+        emailLabel.textContent = t.email;
+        const emailSpan = emailLabel.parentElement.querySelector('span');
+        if (emailSpan && emailSpan.textContent.includes('email anytime')) {
+            emailSpan.textContent = t.sendEmailAnytime;
+        }
+    }
+    
+    const phoneLabel = document.querySelectorAll('.contact__item h4')[1];
+    if (phoneLabel && phoneLabel.textContent === 'Phone') {
+        phoneLabel.textContent = t.phone;
+        const phoneSpan = phoneLabel.parentElement.querySelector('span');
+        if (phoneSpan && phoneSpan.textContent.includes('Available for calls')) {
+            phoneSpan.textContent = t.availableForCalls;
+        }
+    }
+    
+    const locationLabel = document.querySelectorAll('.contact__item h4')[2];
+    if (locationLabel && locationLabel.textContent === 'Location') {
+        locationLabel.textContent = t.location;
+        const locationSpan = locationLabel.parentElement.querySelector('span');
+        if (locationSpan && locationSpan.textContent.includes('remote opportunities')) {
+            locationSpan.textContent = t.openToRemote;
+        }
+    }
+    
+    const followMeTitle = document.querySelectorAll('.contact__info-title')[1];
+    if (followMeTitle && followMeTitle.textContent.includes('Follow Me')) {
+        followMeTitle.textContent = t.followMe;
+    }
+    
+    const availableForWork = document.querySelector('.contact__availability');
+    if (availableForWork) {
+        const icon = availableForWork.querySelector('i');
+        availableForWork.innerHTML = icon ? `<i class='bx bxs-check-circle'></i> ${t.availableForWork}` : t.availableForWork;
+        const p = availableForWork.querySelector('p');
+        if (p) {
+            const desktop = p.querySelector('.text-desktop');
+            const mobile = p.querySelector('.text-mobile');
+            if (desktop) desktop.textContent = t.availableTextDesktop;
+            if (mobile) mobile.textContent = t.availableTextMobile;
+        }
+    }
+    
+    const formTitle = document.querySelector('.contact__form-title');
+    if (formTitle) formTitle.textContent = t.sendMessage;
+    
+    const formLabels = document.querySelectorAll('.form-group label');
+    formLabels.forEach(label => {
+        const forAttr = label.getAttribute('for');
+        if (forAttr === 'name') label.textContent = t.fullName;
+        else if (forAttr === 'email') label.textContent = t.emailAddress;
+        else if (forAttr === 'subject') label.textContent = t.subject;
+        else if (forAttr === 'message') label.textContent = t.message;
+    });
+    
+    const sendButton = document.querySelector('.contact__form .btn--primary');
+    if (sendButton) sendButton.textContent = t.sendMessageButton;
+    
+    const formNote = document.querySelector('.form-response-note');
+    if (formNote) {
+        const icons = formNote.querySelectorAll('i');
+        if (icons.length >= 2) {
+            formNote.innerHTML = `<i class='bx bx-time-five'></i> ${t.usuallyResponds}<br><i class='bx bx-coffee'></i> ${t.freeConsultation}`;
+        }
+    }
+    
+    // Footer
+    const footerTitle = document.querySelector('.footer__title');
+    if (footerTitle && footerTitle.textContent.includes('Expertise')) {
+        footerTitle.textContent = t.expertise;
+    }
+    
+    const footerLinks = document.querySelectorAll('.footer__link');
+    footerLinks.forEach(link => {
+        if (link.textContent.includes('Backend Development')) link.textContent = t.backendDevelopment;
+        else if (link.textContent.includes('Cloud Migration')) link.textContent = t.cloudMigration;
+        else if (link.textContent.includes('AI & Automation')) link.textContent = t.aiAutomation;
+        else if (link.textContent.includes('GIS Solutions')) link.textContent = t.gisSolutions;
+    });
+    
+    const footerDescDesktop = document.querySelector('.footer__description .text-desktop');
+    if (footerDescDesktop) footerDescDesktop.textContent = t.footerDescriptionDesktop;
+    
+    const footerDescMobile = document.querySelector('.footer__description .text-mobile');
+    if (footerDescMobile) footerDescMobile.textContent = t.footerDescriptionMobile;
+};
+
+// Actualizar textos al cargar
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        updateHTMLTexts();
+        updateChatbotTexts();
+    });
+} else {
+    updateHTMLTexts();
+    updateChatbotTexts();
+}
+
 async function pedirChatGPT(prompt) {
     try {
         const rawResponseData = localStorage.getItem('chatgptResponseId');
@@ -223,7 +709,7 @@ async function pedirChatGPT(prompt) {
         const response = await fetch("/.netlify/functions/chatgpt", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt, previousResponseId: storedResponseId }),
+            body: JSON.stringify({ prompt, previousResponseId: storedResponseId, lang: currentLang }),
         });
 
         if (!response.ok) {
@@ -336,7 +822,7 @@ function toggleChatbot(forceOpen) {
         }
         dismissChatbotHint(true);
         if (chatbotMessages && chatbotMessages.children.length === 0) {
-            appendMessage('assistant', '¡Hello! I am your virtual assistant. Ask me about my experience, projects or any detail you want to know about me.');
+            appendMessage('assistant', t.initialMessage);
         }
         setTimeout(() => {
             chatbotInput?.focus();
@@ -411,7 +897,7 @@ if (chatbotForm) {
         setChatbotBusy(true);
         chatbotInput.value = '';
 
-        appendMessage('assistant', 'Let me think...');
+        appendMessage('assistant', t.thinking);
         const thinkingBubble = chatbotMessages.lastElementChild;
 
         const response = await pedirChatGPT(message);
@@ -423,7 +909,7 @@ if (chatbotForm) {
         if (response?.reply) {
             appendMessage('assistant', response.reply);
         } else {
-            appendMessage('assistant', 'Sorry, I couldn\'t get a response. Try again later.');
+            appendMessage('assistant', t.errorMessage);
         }
 
         setChatbotBusy(false);
@@ -435,10 +921,10 @@ if (chatbotMic) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         chatbotMic.disabled = true;
-        chatbotMic.title = "Voice input is not supported by this browser";
+        chatbotMic.title = t.voiceNotSupported;
     } else {
         const recognition = new SpeechRecognition();
-        recognition.lang = 'es-ES';
+        recognition.lang = currentLang === 'es' ? 'es-ES' : 'en-US';
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
 
