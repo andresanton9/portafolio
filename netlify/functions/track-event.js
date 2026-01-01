@@ -33,9 +33,9 @@ const saveToNetlifyDB = async (eventData, serverTimestamp) => {
       return { success: false, error: "NETLIFY_DATABASE_URL not configured" };
     }
 
-    // Importar @netlify/neon dinámicamente
-    const { neon } = await import("@netlify/neon");
-    const sql = neon(); // Automáticamente usa NETLIFY_DATABASE_URL
+    // Importar @neondatabase/serverless
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(process.env.NETLIFY_DATABASE_URL);
     
     // Insertar el evento en la base de datos
     const result = await sql`
