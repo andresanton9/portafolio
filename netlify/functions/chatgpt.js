@@ -213,54 +213,38 @@ exports.handler = async (event) => {
       };
     }
 
-    // Siempre usar streaming
-    const streamResponse = new ReadableStream({
-      start: async (controller) => {
-        const encoder = new TextEncoder();
-        try {
-          let currentConversationId = await createConversationIfNeeded(conversationId);
-          currentConversationId = await sendUserMessage(currentConversationId, prompt);
+    let currentConversationId = await createConversationIfNeeded(conversationId);
+    currentConversationId = await sendUserMessage(currentConversationId, prompt);
 
-          controller.enqueue(
-            encoder.encode(
-              `event: conversation\n` +
-                `data: ${JSON.stringify({ threadId: currentConversationId, conversationId: currentConversationId })}\n\n`
-            )
-          );
+    // Procesar el stream completo y devolverlo
+    const bodyStream = await openaiStreamResponse(currentConversationId);
+    const reader = bodyStream.getReader();
+    const decoder = new TextDecoder();
+    let streamData = `event: conversation\n` +
+      `data: ${JSON.stringify({ threadId: currentConversationId, conversationId: currentConversationId })}\n\n`;
 
-          const bodyStream = await openaiStreamResponse(currentConversationId);
-          const reader = bodyStream.getReader();
-
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            if (value) {
-              controller.enqueue(value);
-            }
-          }
-
-          controller.close();
-        } catch (err) {
-          controller.enqueue(
-            new TextEncoder().encode(
-              `event: error\n` +
-                `data: ${JSON.stringify({ message: err.message })}\n\n`
-            )
-          );
-          controller.close();
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        if (value) {
+          streamData += decoder.decode(value, { stream: true });
         }
-      },
-    });
+      }
+    } finally {
+      reader.releaseLock();
+    }
 
-    return new Response(streamResponse, {
-      status: 200,
+    return {
+      statusCode: 200,
+      body: streamData,
       headers: {
         "Content-Type": "text/event-stream; charset=utf-8",
         "Cache-Control": "no-cache, no-transform",
         Connection: "keep-alive",
         "Access-Control-Allow-Origin": "*",
       },
-    });
+    };
   } catch (error) {
     console.error("Error handler:", error);
     return {
